@@ -13,7 +13,7 @@
 - **Frontend**: React Native
 - **Backend**: FastAPI (Python)
 - **AI & NLP**: Python, LangChain
-- **Database**: SQLite, Pinecone (for AI-powered recommendations)
+- **Database**: SQLite
 
 ## Installation
 ### Prerequisites
