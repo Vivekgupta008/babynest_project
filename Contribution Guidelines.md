@@ -5,7 +5,7 @@ Thank you for your interest in contributing to **BabyNest**! We appreciate your 
 ## How to Contribute
 
 ### 1. Fork the Repository
-- Navigate to the [BabyNest repository](https://github.com/your-repo/babynest).
+- Navigate to the [BabyNest repository](https://github.com/AOSSIE-Org/BabyNest/).
 - Click the **Fork** button in the top right corner.
 - Clone the forked repository to your local machine:
   ```sh
@@ -42,7 +42,7 @@ Thank you for your interest in contributing to **BabyNest**! We appreciate your 
 
 ## Submitting a Video Demonstration
 To help maintainers understand your changes, submit a short video showcasing the new feature or bug fix:
-- Record a short demo using tools like **Loom, OBS Studio, or QuickTime**.
+- Record a short demo.
 - Upload the video and share a link in the PR description.
 
 ## Reporting Issues
