@@ -9,10 +9,10 @@ import {
   StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 
-export default function CustomHeader()  {
+export default function CustomHeader() {
   const navigation = useNavigation();
 
   const openDrawer = () => {
@@ -20,35 +20,31 @@ export default function CustomHeader()  {
   };
 
   return (
-  <>
-  <LinearGradient colors={["rgb(35,79,147)", "rgb(90,110,203)"]} style={styles.container}>
-      <StatusBar
-        backgroundColor="#FFFFFF"
-        barStyle="dark-content"
-      />
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={openDrawer}
-          style={styles.menuButton}
-        >
-          <Icon name="menu" size={24} color="#333" />
-        </TouchableOpacity>
+    <>
+      <LinearGradient
+        colors={['rgb(35,79,147)', 'rgb(90,110,203)']}
+        style={styles.container}>
+        <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
+        <View style={styles.header}>
+          <TouchableOpacity onPress={openDrawer} style={styles.menuButton}>
+            <Icon name="menu" size={24} color="#333" />
+          </TouchableOpacity>
 
-        <Text style={styles.title}>Home</Text>
+          <Text style={styles.title}>Home</Text>
 
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Settings')}
-          style={styles.profileButton}
-        >
-          <Image
-           source={require('../assets/Avatar.png')}   style={styles.profileImage}
-          />
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Settings')}
+            style={styles.profileButton}>
+            <Image
+              source={require('../assets/Avatar.jpeg')}
+              style={styles.profileImage}
+            />
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
     </>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -58,7 +54,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.1,
         shadowRadius: 4,
       },
@@ -73,7 +69,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    marginTop: Platform.OS === 'ios' ? 44 : 0, 
+    marginTop: Platform.OS === 'ios' ? 44 : 0,
   },
   menuButton: {
     padding: 8,
@@ -95,4 +91,3 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
 });
-
