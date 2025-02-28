@@ -153,8 +153,8 @@ export default function HomeScreen({navigation}) {
             <Text style={styles.sectionTitle}>Upcoming / Due Tasks</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
               {dueAppointments.map((item, index) => (
-                <LinearGradient colors={["rgb(35,79,147)", "rgb(90,110,203)"]} style={styles.dueItem}>
-                <View key={index}>
+                <LinearGradient  key={index} colors={["rgb(35,79,147)", "rgb(90,110,203)"]} style={styles.dueItem}>
+                <View>
                   <Text style={styles.dueText}>{item}</Text>
                 </View>
                 </LinearGradient>
