@@ -174,7 +174,7 @@ export default function HomeScreen({navigation}) {
         </View>
       </Modal>
 
-        <TouchableOpacity style={styles.floatingButton} onPress={navigation.navigate('Chat')}>
+        <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.navigate('Chat')}>
           <MaterialIcons name="smart-toy" size={30} color="#fff" />
         </TouchableOpacity>
         </View>
