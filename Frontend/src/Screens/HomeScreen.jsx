@@ -119,18 +119,14 @@ export default function HomeScreen({navigation}) {
         <LinearGradient colors={["#fce4ec", "#fce4ec"]} style={styles.container1}>
           <Card.Title title="Appointments" />
           <Card.Content>
-            <FlatList
-              data={appointments.slice(0, 2)}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <>
-                <View style={styles.listItem}>
-                  <Text style={styles.noteText}>{item.title}</Text> 
-                </View>
-                { <Divider style={ styles.divider} />}
-                </>
-              )}
-            />
+            {appointments.map((item) => (
+              <View key={item.id}>
+              <View style={styles.listItem}>
+                <Text style={styles.noteText}>{item.title}</Text> 
+              </View>
+              { <Divider style={ styles.divider} />}
+              </View>
+            ))}
             <Button mode="contained" onPress={() => navigation.navigate("Calendar")} style={styles.addButton}>
               See More
             </Button>
@@ -153,7 +149,7 @@ export default function HomeScreen({navigation}) {
           </View>
           </ScrollView>
 
-        <TouchableOpacity style={styles.floatingButton} onPress={navigation.navigate('Chat')}>
+        <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.navigate('Chat')}>
           <MaterialIcons name="smart-toy" size={30} color="#fff" />
         </TouchableOpacity>
         </View>
