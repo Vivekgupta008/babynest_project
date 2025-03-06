@@ -13,12 +13,12 @@ import Svg, { Path, Circle } from "react-native-svg";
 export default function HomeScreen({navigation}) {
 
   const [appointments, setAppointments] = useState([
-    { title: "Initial Prenatal Visit - Week 6-8", completed: false },
-    { title: "First Trimester Screening - Week 10-13", completed: false },
-    { title: "Anatomy Scan - Week 18-22", completed: false },
-    { title: "Glucose Tolerance Test - Week 24-28", completed: false },
-    { title: "Routine Check-ups", completed: false },
-    { title: "Group B Strep Test - Week 35-37", completed: false },
+    { id:1, title: "Initial Prenatal Visit - Week 6-8", completed: false },
+    { id:2, title: "First Trimester Screening - Week 10-13", completed: false },
+    { id:3, title: "Anatomy Scan - Week 18-22", completed: false },
+    { id:4, title: "Glucose Tolerance Test - Week 24-28", completed: false },
+    { id:5, title: "Routine Check-ups", completed: false },
+    { id:6, title: "Group B Strep Test - Week 35-37", completed: false },
   ]);
 
      // Dummy data for Due Appointments 
@@ -129,7 +129,7 @@ export default function HomeScreen({navigation}) {
         <LinearGradient colors={["#fce4ec", "#fce4ec"]} style={styles.container1}>
           <Card.Title title="Appointments" />
           <Card.Content>
-            <FlatList
+            {/* <FlatList
               data={appointments}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => (
@@ -140,7 +140,15 @@ export default function HomeScreen({navigation}) {
                 { <Divider style={ styles.divider} />}
                 </>
               )}
-            />
+            /> */}
+            {appointments.map((item) => (
+              <View key={item.id}>
+              <View style={styles.listItem}>
+                <Text style={styles.noteText}>{item.title}</Text> 
+              </View>
+              { <Divider style={ styles.divider} />}
+              </View>
+            ))}
             <Button mode="contained" onPress={() => setModalVisible(true)} style={styles.addButton}>
               + Add Appointment
             </Button>
@@ -153,8 +161,8 @@ export default function HomeScreen({navigation}) {
             <Text style={styles.sectionTitle}>Upcoming / Due Tasks</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
               {dueAppointments.map((item, index) => (
-                <LinearGradient colors={["rgb(35,79,147)", "rgb(90,110,203)"]} style={styles.dueItem}>
-                <View key={index}>
+                <LinearGradient  key={index} colors={["rgb(35,79,147)", "rgb(90,110,203)"]} style={styles.dueItem}>
+                <View>
                   <Text style={styles.dueText}>{item}</Text>
                 </View>
                 </LinearGradient>
@@ -174,7 +182,7 @@ export default function HomeScreen({navigation}) {
         </View>
       </Modal>
 
-        <TouchableOpacity style={styles.floatingButton} onPress={navigation.navigate('Chat')}>
+        <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.navigate('Chat')}>
           <MaterialIcons name="smart-toy" size={30} color="#fff" />
         </TouchableOpacity>
         </View>
