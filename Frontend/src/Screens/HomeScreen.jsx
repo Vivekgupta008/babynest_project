@@ -28,16 +28,6 @@ export default function HomeScreen({navigation}) {
     "Regular Check-up - Week 30",
   ];
 
-  const [newAppointment, setNewAppointment] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const handleSave = () => {
-    if (!newAppointment.trim()) return;
-    setAppointments([...appointments, { title: newAppointment, completed: false }]);
-    setNewAppointment("");
-    setModalVisible(false);
-  };
-
   const openDrawer = () => {
     navigation.openDrawer();
   };
@@ -135,19 +125,18 @@ export default function HomeScreen({navigation}) {
         <LinearGradient colors={["#fce4ec", "#fce4ec"]} style={styles.appointmentCard}>
           <Card.Title title="Appointments" titleStyle={styles.cardTitle}/>
           <Card.Content>
-             <FlatList
-              data={appointments}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <>
-                <View style={styles.listItem}>
-                  <Text style={styles.noteText}>{item.title}</Text> 
-                </View>
-                { <Divider style={ styles.divider} />}
-                </>
-              )}
 
-              + Add Appointment
+            {appointments.map((item) => (
+              <View key={item.id}>
+              <View style={styles.listItem}>
+                <Text style={styles.noteText}>{item.title}</Text> 
+              </View>
+              { <Divider style={ styles.divider} />}
+              </View>
+            ))}
+            <Button mode="contained" onPress={() => navigation.navigate("Calendar")} style={styles.addButton}>
+              See More
+
             </Button>
           </Card.Content>
       </LinearGradient>
@@ -168,17 +157,7 @@ export default function HomeScreen({navigation}) {
           </View>
           </ScrollView>
 
-      {/* Add Appointment Modal */}
-      <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <TextInput label="Enter appointment" value={newAppointment} onChangeText={setNewAppointment} style={styles.modalInput} />
-            <Button mode="contained" onPress={handleSave} style={styles.modalButton}>Save</Button>
-            <Button mode="text" onPress={() => setModalVisible(false)}>Cancel</Button>
-          </View>
-        </View>
-      </Modal>
-
+        <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.navigate('Chat')}>
 
           <MaterialIcons name="smart-toy" size={30} color="#fff" />
         </TouchableOpacity>
@@ -295,13 +274,10 @@ const styles = StyleSheet.create({
   },
   addButton: { 
     backgroundColor: "rgb(218,79,122)",
-    marginBottom: 10,
-    marginTop: 10,
-    width: "100%",
-  },
-  buttonLabel: {
-    fontSize: 14,
-    fontWeight: "bold",
+
+    marginTop: -10,
+    marginBottom: 10 
+
   },
   sectionTitle: {
     fontSize: 18,
