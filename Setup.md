@@ -138,7 +138,9 @@ This starts the local vector database.
   
 
 ### iOS Issues
-- If the build fails, try:
+- Try uninstalling any app in ios simulator and close the terminal and run all the commands again as mentioned here.
+
+- If the issues still persist and build fails, try:
   sh
   cd ios
   pod install --verbose
