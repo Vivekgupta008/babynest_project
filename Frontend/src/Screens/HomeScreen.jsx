@@ -135,7 +135,7 @@ export default function HomeScreen({navigation}) {
         <LinearGradient colors={["#fce4ec", "#fce4ec"]} style={styles.appointmentCard}>
           <Card.Title title="Appointments" titleStyle={styles.cardTitle}/>
           <Card.Content>
-            {/* <FlatList
+             <FlatList
               data={appointments}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => (
