@@ -2,7 +2,7 @@
 //F4D1FF FA9EBC 0B1957 5784E6
 
 import React, { useState,useRef } from "react";
-import { View, Text, TouchableOpacity, FlatList, StyleSheet,Animated, Modal, ScrollView,Dimensions,Image  } from "react-native";
+import { View, Text, TouchableOpacity, FlatList, StyleSheet,Animated, Modal, ScrollView,Dimensions,Image, Platform, SafeAreaView } from "react-native";
 import { Card, Button, TextInput,Divider } from "react-native-paper";
 import {LinearGradient} from "react-native-linear-gradient";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
@@ -41,7 +41,7 @@ export default function HomeScreen({navigation}) {
 
   return (
     <>
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
         <View style={styles.gradientContainer}> 
         <LinearGradient colors={["rgb(218,79,122)", "#fff"]} style={styles.gradient}> 
           {/* <Svg height="100%" width="100%" style={styles.curve} viewBox={`0 0 ${width} 100`}>
@@ -67,8 +67,13 @@ export default function HomeScreen({navigation}) {
                  />
                </TouchableOpacity>
              </View>
-       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.progressContainer}>  
+       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}showsVerticalScrollIndicator={false}>
+        {/* <View style={styles.progressContainer}>  */}
+          {/* Fixed upper section to match design */}
+        <View style={styles.upperSection}>
+          <Text style={styles.title}>16th Week of Pregnancy</Text>
+
+          <View style={styles.progressCircleContainer}>
            <Svg height={200} width={200} style={styles.progressCircle}>
             {/* Background Circle */}
             <Circle cx="100" cy="100" r="90" stroke="rgba(255, 255, 255, 0.3)" strokeWidth="10" fill="none" /> 
@@ -85,7 +90,7 @@ export default function HomeScreen({navigation}) {
               transform="rotate(-90 100 100)"
             />
           </Svg>  
-          <Text style={styles.title}>16th Week of Pregnancy</Text>
+          
           {/* Baby Image */}
            <View style={styles.babyImageContainer}>
             <Image source={require("../assets/Baby.jpeg")} style={styles.babyImage} />
@@ -93,17 +98,18 @@ export default function HomeScreen({navigation}) {
         </View>
 
       {/* SOS Button */}
-      <View style={styles.sosContainer}>
+      {/* <View style={styles.sosContainer}>  */}
       <TouchableOpacity style={styles.sosButton} onPress={() => navigation.navigate("SOSAlert")}>
         <Icon name="call" size={22} color="white" />
         <Text style={styles.sosText}>SOS</Text>
       </TouchableOpacity>
-      </View> 
+      {/* </View>  */}
         <View style={styles.weekContainer}>
            <WeekNumber number="31" />
            <WeekNumber number="32" />
            <WeekNumber number="33" active />
            <WeekNumber number="34" />
+         </View>
          </View>
 
         {/* Fact Card */}
@@ -116,9 +122,10 @@ export default function HomeScreen({navigation}) {
         </LinearGradient>
 
         {/* Appointments */}
-        <LinearGradient colors={["#fce4ec", "#fce4ec"]} style={styles.container1}>
-          <Card.Title title="Appointments" />
+        <LinearGradient colors={["#fce4ec", "#fce4ec"]} style={styles.appointmentCard}>
+          <Card.Title title="Appointments" titleStyle={styles.cardTitle}/>
           <Card.Content>
+
             {appointments.map((item) => (
               <View key={item.id}>
               <View style={styles.listItem}>
@@ -129,6 +136,7 @@ export default function HomeScreen({navigation}) {
             ))}
             <Button mode="contained" onPress={() => navigation.navigate("Calendar")} style={styles.addButton}>
               See More
+
             </Button>
           </Card.Content>
       </LinearGradient>
@@ -150,9 +158,10 @@ export default function HomeScreen({navigation}) {
           </ScrollView>
 
         <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.navigate('Chat')}>
+
           <MaterialIcons name="smart-toy" size={30} color="#fff" />
         </TouchableOpacity>
-        </View>
+        </SafeAreaView>
         </>
   );
 }
@@ -163,13 +172,25 @@ const WeekNumber = ({ number, active = false }) => (
   </View>
 )
 
+const { width } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
+
+  // Fixed upper section styles to match the design
+  upperSection: {
+    width: "100%",
+    alignItems: "center",
+    marginTop: 5,
+    marginBottom: 10,
+    position: "relative",
+  },
   //   week horiztonol bar at top
     weekContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-    gap: 10,
+    justifyContent: "center",
+    marginTop:0,
+    marginBottom: 10,
+    gap: 12,
   },
   dayBox: {
     padding: 10,
@@ -188,26 +209,30 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   container: { 
-    flex: 1, 
-    padding:20, 
+    flex: 1,  
     backgroundColor: "#fff" 
   },
-  container1: { 
-    flex: 1, 
-    padding: 10, 
-    marginBottom: 20 ,
-    borderRadius: 20
+  appointmentCard: { 
+    borderRadius: 20,
+    marginBottom: 20,
+    width: "100%"
   },
-  title: { fontSize: 22, 
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  title: {
+    fontSize: 20, 
     fontWeight: "bold", 
     color: "#333",
-    marginRight: 100,
-    marginBottom: 30 
+    marginRight: 5,
+    marginBottom: 5, 
   },
   factCard: { 
     marginBottom: 20, 
     borderRadius: 20 ,
-    padding: 10
+    padding: 10,
+    width: "100%"
   },
   factText: { 
     fontSize: 16, 
@@ -216,7 +241,8 @@ const styles = StyleSheet.create({
   },
   section: { 
     marginBottom: 20, 
-    borderRadius: 10 
+    borderRadius: 10,
+    width: "100%"
   },
   listItem: { 
     flexDirection: "row", 
@@ -237,18 +263,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff", 
     padding: 20, 
     borderRadius: 10, 
-    width: "80%" 
+    width: width *0.8, 
+  },
+  modalInput: {
+    marginBottom: 10,
   },
   modalButton: { 
-    marginTop: 10 
+    marginTop: 15,
+    marginBottom: 10,
   },
   addButton: { 
     backgroundColor: "rgb(218,79,122)",
+
     marginTop: -10,
     marginBottom: 10 
+
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     color: "rgba(0, 0, 0, 0.8)",
     marginBottom: 10,
@@ -261,6 +293,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 50,
     elevation: 5,
+    zIndex: 999,
   },
 
      // Due Appointments
@@ -275,14 +308,15 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     marginRight: 10,
-    height: 120,
-    width: 150,
+    height: 100,
+    width: width * 0.4,
+    minWidth: 150,
   },
   dueText: {
-    marginLeft: 10,
-    marginRight: 10,
     fontSize: 16,
     color: "#fff",
+    textAlign: "center",
+    width: "100%",
   },
 
   //floating chatbot button
@@ -297,26 +331,28 @@ const styles = StyleSheet.create({
   },
 
   //sos feature
-sosContainer:{ 
-  flex: 1, 
-  justifyContent: "center", 
-  alignItems: "center", 
-  backgroundColor: "rgb(218,79,122)", 
-  marginBottom: 10 
-},
+// sosContainer:{ 
+//   flex: 1, 
+//   justifyContent: "center", 
+//   alignItems: "center", 
+//   backgroundColor: "rgb(218,79,122)", 
+//   marginBottom: 10 
+// },
 sosButton: { 
+  position: "absolute",
+  top: 120, // Adjusted position to match the image better
+  right: 15,
   backgroundColor: "rgb(218,79,122)", 
-  padding: 8, 
-  borderRadius: 40, 
+  paddingHorizontal: 10, 
+  paddingVertical: 6,
+  borderRadius: 20, 
   flexDirection: "row", 
   alignItems: "center",
-  zIndex:999,
-  marginLeft:270,
-  marginTop:-450 
+  zIndex:100,
 },
 sosText: { 
   color: "white", 
-  fontSize: 12, 
+  fontSize: 14, 
   fontWeight: "bold", 
   marginLeft: 5 
 },
@@ -325,7 +361,7 @@ sosText: {
 divider: {
   height: 1,
   backgroundColor: 'rgb(202, 202, 202)',
-  marginHorizontal: 5,
+  marginVertical: 5,
 },
 
 //upper portion of home screen
@@ -334,7 +370,7 @@ divider: {
     top: 0,
     left: 0,
     right: 0,
-    height: "45%",
+    height: "35%",
   },
   gradient: {
     flex: 1,
@@ -347,7 +383,7 @@ divider: {
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
+    padding: 15,
     alignItems: "center",
   },
   progressContainer: {
@@ -359,15 +395,27 @@ divider: {
     justifyContent: "center",
   },
   progressCircle: {
-    marginTop: 63,
     position: "absolute",
   },
   babyImageContainer: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
+    position: "absolute",
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     overflow: "hidden",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -75 }, { translateY: -75 }],
+  },
+  progressCircleContainer: {
+    position: "relative",
+    width: 200,
+    height: 180, // Reduced height to better match the image
+    alignItems: "center",
+    justifyContent: "center",
   },
   babyImage: {
     width: "100%",
@@ -375,14 +423,16 @@ divider: {
     resizeMode: "cover",
   },
     weekContainer: {
-    flexDirection: "row",
-    gap: 15,
+    flexDirection: "row", 
+    justifyContent: "center",
+    gap:12,
     marginBottom: 10,
+    marginTop: 10,
   },
   weekNumber: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 35,
+    height: 35,
+    borderRadius: 17.5,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(255, 75, 110, 0.1)",
@@ -392,7 +442,7 @@ divider: {
   },
   weekNumberText: {
     color: "#FF4B6E",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
   },
   weekNumberTextActive: {
@@ -408,9 +458,16 @@ divider: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: Platform.OS === 'ios' ? 44 : 0, 
+    marginTop: Platform.OS === 'ios' ? 0: 0,
+    paddingHorizontal: 20, 
+    zIndex: 10,
   },
-
+  menuButton: {
+    padding: 8,
+  },
+  profileButton: {
+    padding: 8,
+  },
     profileImage: {
       width: 32,
       height: 32,

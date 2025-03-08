@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState , useEffect } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,13 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
+  Platform,
+  SafeAreaView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-const { width, height } = Dimensions.get("window");
-
+const { width:initialWidth, height: initialHeight } = Dimensions.get("window");
+const scale = size =>(initialWidth / 375) * size;
 const onboardingData = [
   {
     id: "1",
@@ -46,6 +48,21 @@ export default function OnBoardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
 
+  const [dimensions, setDimensions] = useState({
+    width: initialWidth,
+    height: initialHeight
+  });
+
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setDimensions({
+        width: window.width,
+        height: window.height
+      });
+    });
+
+    return () => subscription?.remove();
+  }, []);
   const handleNext = () => {
     if (currentIndex < onboardingData.length - 1) {
       flatListRef.current.scrollToIndex({ index: currentIndex + 1 });
@@ -64,7 +81,12 @@ export default function OnBoardingScreen() {
     }
   }).current;
 
+  const viewabilityConfig = {
+    itemVisiblePercentThreshold: 50
+  };
+
   return (
+    <SafeAreaView style={styles.safeArea}>
     <View style={styles.container}>
       <FlatList
         ref={flatListRef}
@@ -73,12 +95,25 @@ export default function OnBoardingScreen() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.id}
+          getItemLayout={(data, index) => ({
+            length: dimensions.width,
+            offset: dimensions.width * index,
+            index,
+          })}
         renderItem={({ item }) => (
-          <View style={[styles.page, { width }]}> 
+          <View style={[styles.page, { width: dimensions.width}]}> 
             <Text style={styles.title}>
               {item.title} <Text style={styles.highlight}>{item.highlight}</Text>
             </Text>
-            <Image source={item.image} style={styles.image} resizeMode="contain" />
+            <Image source={item.image} style={[
+                  styles.image,
+                  {
+                    width: dimensions.width * 0.8,
+                    height: Math.min(dimensions.height * 0.4, scale(300)),
+                  }
+                ]} 
+                resizeMode="contain" 
+                />
             <View style={styles.paginationContainer}>
               {onboardingData.map((_, index) => (
                 <Animated.View
@@ -87,13 +122,18 @@ export default function OnBoardingScreen() {
                     styles.dot,
                     {
                       backgroundColor: index === currentIndex ? "#ff4081" : "#ddd",
-                      width: index === currentIndex ? 12 : 8,
+                      width: index === currentIndex ? scale(12) : scale(8),
+                      height: scale(8),
+                      borderRadius: scale(4),
+                      marginHorizontal: scale(4),
                     },
                   ]}
                 />
               ))}
             </View>
-            <Text style={styles.description}>{item.description}</Text>
+            <Text style={[styles.description,{ width: dimensions.width * 0.85 }]}>
+            {item.description}
+            </Text>
           </View>
         )}
         onScroll={Animated.event(
@@ -101,10 +141,18 @@ export default function OnBoardingScreen() {
           { useNativeDriver: false }
         )}
         onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
       />
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={handleSkip}>
+      <View style={[
+        styles.buttonContainer,
+        {
+            bottom: Platform.OS === 'ios' ? scale(40) : scale(30),
+            paddingHorizontal: dimensions.width * 0.05
+          }
+          ]}>
+        <TouchableOpacity onPress={handleSkip}
+        hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
           <Text style={styles.skipText}>SKIP</Text>
         </TouchableOpacity>
 
@@ -118,10 +166,15 @@ export default function OnBoardingScreen() {
         </TouchableOpacity>
       </View>
     </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
@@ -131,25 +184,25 @@ const styles = StyleSheet.create({
   page: {
     alignItems: "center",
     justifyContent: "center",
+    paddingTop:scale(20),
   },
   title: {
-    fontSize: 26,
+    fontSize: scale(26),
     fontWeight: "bold",
     textAlign: "center",
     color: "#000",
-    marginBottom: 10,
+    marginBottom: scale(15),
+    paddingHorizontal: scale(10),
   },
   highlight: {
     color: "#ff4081",
   },
   image: {
-    width: "80%",
-    height: 300,
-    marginBottom: 10,
+    marginBottom: scale(15),
   },
   paginationContainer: {
     flexDirection: "row",
-    marginBottom: 10,
+    marginBottom: scale(15),
   },
   dot: {
     height: 8,
@@ -157,34 +210,36 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   description: {
-    fontSize: 14,
+    fontSize: scale(14),
     textAlign: "center",
     color: "#666",
-    paddingHorizontal: 15,
-    marginTop: 5,
+    paddingHorizontal: scale(15),
+    marginTop: scale(5),
+    lineHeight: scale(20),
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
     position: "absolute",
-    bottom: 40,
-    paddingHorizontal: 20,
+    paddingHorizontal: scale(20),
   },
   skipText: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: "#666",
   },
   nextButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: scale(10),
+    paddingHorizontal: scale(20),
   },
   getStartedButton: {
     backgroundColor: "#ff4081",
-    borderRadius: 20,
+    borderRadius: scale(20),
+    paddingVertical: scale(10),
+    paddingHorizontal: scale(20),
   },
   nextText: {
-    fontSize: 16,
+    fontSize:scale(16),
     color: "#ff4081",
     fontWeight: "bold",
   },
