@@ -6,12 +6,13 @@ import { Modal } from "react-native-paper";
 
 const days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
-const appointments = [
-  { id:1, title: "Client Feedback Call", time: "08:00 - 8:15", start: 8, end: 9.25, color: "#FDE68A" },
-  { id:2, title: "Product Team Call", time: "10:15 - 11:15", start: 10.25, end: 11.25, color: "#BFDBFE" },
-  { id:3, title: "Design Standup Call", time: "12:00 - 13:00", start: 12, end: 13, color: "#FECACA" },
-  { id:4, title: "Product Vision Planning", time: "14:30 - 15:15", start: 14.5, end: 15.25, color: "#D1FAE5" }
-];
+// const appointments = [
+//   { id:1, title: "Client Feedback Call", time: "08:00 - 8:15", start: 8, end: 9.25, color: "#FDE68A" },
+//   { id:2, title: "Product Team Call", time: "10:15 - 11:15", start: 10.25, end: 11.25, color: "#BFDBFE" },
+//   { id:3, title: "Design Standup Call", time: "12:00 - 13:00", start: 12, end: 13, color: "#FECACA" },
+//   { id:4, title: "Product Vision Planning", time: "14:30 - 15:15", start: 14.5, end: 15.25, color: "#D1FAE5" }
+// ];
+
 
 const generateWeekDates = (startDate) => {
   let weekDates = [];
@@ -32,6 +33,7 @@ const ScheduleScreen = () => {
   const [isAddAppointmentModalVisible, setAddAppointmentModalVisible] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState({title: "", start: 8.00, end: 9.00});
+  const [appointments, setAppointments] = useState([]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -40,6 +42,22 @@ const ScheduleScreen = () => {
       useNativeDriver: true
     }).start();
   }, [fadeAnim]);
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+  
+  const fetchAppointments = async () => {
+    try {
+      const response = await fetch("http://192.168.243.79:5000/get_appointments");
+      const data = await response.json();
+      console.log("Response:", data);
+      setAppointments(data);
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+    }
+  };
+  
 
   const showCalendar = () => setCalendarVisible(true);
   const hideCalendar = () => setCalendarVisible(false);
@@ -61,6 +79,11 @@ const ScheduleScreen = () => {
     setModalOpen(false);
     setAddAppointmentModalVisible(false);
   }
+
+    // Filter appointments based on selected date
+  const filteredAppointments = appointments.filter((appt) => {
+    return new Date(appt.appointment_date).toDateString() === selectedDate.toDateString();
+  });
 
   const timeSlotHeight = 80;
 
@@ -104,7 +127,7 @@ const ScheduleScreen = () => {
           ))}
         </View>
 
-        {appointments.map((appt, index) => (
+        {filteredAppointments.map((appt, index) => (
           <View
             key={appt.id}
             style={{
@@ -147,6 +170,102 @@ const ScheduleScreen = () => {
     </View>
   );
 };
+
+
+// import React, { useEffect, useRef, useState } from "react";
+// import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+// import Icon from "react-native-vector-icons/Ionicons";
+// import DateTimePickerModal from "react-native-modal-datetime-picker";
+
+// const days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+// const generateWeekDates = (startDate) => {
+//   let weekDates = [];
+//   for (let i = 0; i < 7; i++) {
+//     let date = new Date(startDate);
+//     date.setDate(startDate.getDate() + i);
+//     weekDates.push(date);
+//   }
+//   return weekDates;
+// };
+
+// const ScheduleScreen = () => {
+//   const [selectedDate, setSelectedDate] = useState(new Date());
+//   const [weekDates, setWeekDates] = useState(generateWeekDates(new Date()));
+//   const [isCalendarVisible, setCalendarVisible] = useState(false);
+//   const [appointments, setAppointments] = useState([]); // Store appointments from backend
+
+//   useEffect(() => {
+//     fetchAppointments();
+//   }, []);
+
+//   const fetchAppointments = async () => {
+//     try {
+//       const response = await fetch("http://192.168.1.7:5000/get_appointments");
+//       const data = await response.json();
+//       console.log("Response:", data);
+//       setAppointments(data);
+//     } catch (error) {
+//       console.error("Error fetching appointments:", error);
+//     }
+//   };
+
+//   const showCalendar = () => setCalendarVisible(true);
+//   const hideCalendar = () => setCalendarVisible(false);
+
+//   const handleDateConfirm = (date) => {
+//     setSelectedDate(date);
+//     setWeekDates(generateWeekDates(date));
+//     hideCalendar();
+//   };
+
+//   // Filter appointments based on selected date
+//   const filteredAppointments = appointments.filter((appt) => {
+//     return new Date(appt.appointment_date).toDateString() === selectedDate.toDateString();
+//   });
+
+//   return (
+//     <View style={styles.container}>
+//       <View style={styles.header}>
+//         <Text style={styles.headerText}>
+//           {selectedDate.toLocaleString("default", { month: "long" })} {selectedDate.getFullYear()}
+//         </Text>
+//         <TouchableOpacity onPress={showCalendar}>
+//           <Icon name="calendar" size={24} color="#3D5A80" style={styles.icon} />
+//         </TouchableOpacity>
+//       </View>
+
+//       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.weekDatesScroll}>
+//         {weekDates.map((date, index) => (
+//           <TouchableOpacity key={index} style={styles.dateItem} onPress={() => setSelectedDate(date)}>
+//             <Text style={[styles.dayText, selectedDate.getDate() === date.getDate() && styles.selectedText]}>
+//               {days[date.getDay()]}
+//             </Text>
+//             <Text style={[styles.dateText, selectedDate.getDate() === date.getDate() && styles.selectedText]}>
+//               {date.getDate()}
+//             </Text>
+//           </TouchableOpacity>
+//         ))}
+//       </ScrollView>
+
+//       <ScrollView style={styles.scheduleContainer}>
+//         {filteredAppointments.length > 0 ? (
+//           filteredAppointments.map((appt, index) => (
+//             <View key={index} style={styles.appointment}>
+//               <Text style={styles.apptTitle}>{appt.title}</Text>
+//               <Text style={styles.apptTime}>{appt.appointment_time}</Text>
+//             </View>
+//           ))
+//         ) : (
+//           <Text style={styles.noAppointments}>No appointments for this date.</Text>
+//         )}
+//       </ScrollView>
+
+//       <DateTimePickerModal isVisible={isCalendarVisible} mode="date" onConfirm={handleDateConfirm} onCancel={hideCalendar} />
+//     </View>
+//   );
+// };
+
 
 const styles = StyleSheet.create({
   container: { 
