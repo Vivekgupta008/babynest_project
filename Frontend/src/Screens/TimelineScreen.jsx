@@ -16,12 +16,11 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import {BASE_URL} from '@env';
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-const API_URL = "http://192.168.243.79:5000/get_tasks"; // Backend API
 
 const TimelineScreen = ({ navigation }) => {
   const [appointments, setAppointments] = useState([]);
@@ -38,7 +37,7 @@ const TimelineScreen = ({ navigation }) => {
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const response = await fetch(API_URL);
+        const response = await fetch(`${BASE_URL}/get_tasks`);
         const data = await response.json();
         console.log("Raw Data from Backend:", data);
   
@@ -70,8 +69,6 @@ const TimelineScreen = ({ navigation }) => {
     fetchAppointments();
   }, []);
   
-  
-
   const markTaskAsDone = (taskId) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     const updatedAppointments = appointments.map((task) => {
@@ -88,7 +85,7 @@ const TimelineScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch(`http://192.168.243.79:5000/move_to_appointment/${selectedTaskId}`, {
+      const response = await fetch(`${BASE_URL}/move_to_appointment/${selectedTaskId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -246,237 +243,3 @@ const styles = StyleSheet.create({
 
 export default TimelineScreen;
 
-
-
-// import React, { useState, useEffect } from "react";
-// import {
-//   View,
-//   Text,
-//   FlatList,
-//   StyleSheet,
-//   TouchableOpacity,
-//   LayoutAnimation,
-//   UIManager,
-//   Platform,
-//   ActivityIndicator,
-// } from "react-native";
-// import Ionicons from "react-native-vector-icons/Ionicons";
-
-// if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
-//   UIManager.setLayoutAnimationEnabledExperimental(true);
-// }
-
-// const API_URL = "http://192.168.1.7:5000/get_appointments"; 
-
-// const TimelineScreen = ({ navigation }) => {
-//   const [timeline, setTimeline] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const fetchTasks = async () => {
-//       try {
-//         const response = await fetch(API_URL);
-//         const data = await response.json();
-//         console.log("Response:", data);
-//         setTimeline(data);
-//       } catch (error) {
-//         console.error("Error fetching tasks:", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchTasks();
-//   }, []);
-
-//   const markTaskAsDone = (taskId) => {
-//     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-//     const updatedTimeline = timeline.map((task) => {
-//       if (task.id === taskId) return { ...task, status: "done" };
-//       if (task.status === "current") return { ...task, status: "upcoming" };
-//       return task;
-//     });
-//     const nextCurrentTaskIndex = updatedTimeline.findIndex((task) => task.status === "upcoming");
-//     if (nextCurrentTaskIndex !== -1) updatedTimeline[nextCurrentTaskIndex].status = "current";
-//     setTimeline(updatedTimeline);
-//   };
-
-//   const getTaskColor = (status) => {
-//     switch (status) {
-//       case "done": return "#87CEFA"; // Blue for completed
-//       case "pending": return "#FFC0CB"; // Pink for pending
-//       case "current": return "#FFC0CB"; // Pink for current
-//       case "upcoming": return "#F5F5F5"; // Grey for upcoming
-//       default: return "#F5F5F5";
-//     }
-//   };
-
-//   return (
-//     <View style={styles.container}>
-//       <View style={styles.header}>
-//         <TouchableOpacity onPress={() => navigation.goBack()}>
-//           <Ionicons name="arrow-back" size={24} color="black" />
-//         </TouchableOpacity>
-//         <Text style={styles.headerTitle}>Timeline</Text>
-//       </View>
-
-//       {loading ? (
-//         <ActivityIndicator size="large" color="#FF4081" style={{ marginTop: 50 }} />
-//       ) : (
-//         <FlatList
-//           data={timeline}
-//           keyExtractor={(item) => item.id.toString()}
-//           contentContainerStyle={{ paddingBottom: 20 }}
-//           renderItem={({ item, index }) => (
-//             <View style={styles.timelineContainer}>
-//               <View style={styles.timelineIndicator}>
-//                 <View style={[styles.circle, { backgroundColor: getTaskColor(item.status) }]} />
-//                 {index !== timeline.length - 1 && <View style={styles.line} />}
-//               </View>
-
-//               <View style={[styles.timelineItem, { backgroundColor: getTaskColor(item.status) }]}>
-//                 <Text style={styles.weekTitle}>Week {item.week}</Text>
-//                 <Text style={styles.description}>{item.description}</Text>
-//                 {item.status === "current" && (
-//                   <TouchableOpacity style={styles.doneButton} onPress={() => markTaskAsDone(item.id)}>
-//                     <Text style={styles.doneButtonText}>Done</Text>
-//                   </TouchableOpacity>
-//                 )}
-//               </View>
-//             </View>
-//           )}
-//         />
-//       )}
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: "#fff", paddingHorizontal: 20 },
-//   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 15 },
-//   headerTitle: { fontSize: 18, fontWeight: "bold" },
-//   timelineContainer: { flexDirection: "row", alignItems: "center", width: "100%", marginVertical: 5 },
-//   timelineIndicator: { alignItems: "center", marginRight: 10 },
-//   circle: { marginTop: 19, width: 12, height: 12, borderRadius: 6 },
-//   line: { width: 2, flex: 1, minHeight: 50, backgroundColor: "#D3D3D3", marginVertical: 5 },
-//   timelineItem: { flex: 1, padding: 15, borderRadius: 15, elevation: 3, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
-//   weekTitle: { fontSize: 16, fontWeight: "bold", color: "#333" },
-//   description: { fontSize: 14, color: "#666", marginTop: 5 },
-//   doneButton: { marginTop: 10, padding: 8, backgroundColor: "#ffffff", borderRadius: 8, alignItems: "center" },
-//   doneButtonText: { color: "#000000", fontSize: 14, fontWeight: "bold" },
-// });
-
-// export default TimelineScreen;
-
-
-
-// import React, { useState, useEffect } from "react";
-// import {
-//   View,
-//   Text,
-//   FlatList,
-//   StyleSheet,
-//   TouchableOpacity,
-//   LayoutAnimation,
-//   UIManager,
-//   Platform,
-//   ActivityIndicator,
-// } from "react-native";
-// import Ionicons from "react-native-vector-icons/Ionicons";
-
-// if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
-//   UIManager.setLayoutAnimationEnabledExperimental(true);
-// }
-
-// const API_URL = "http://192.168.1.7:5000/get_appointments"; // Replace with actual backend URL
-
-// const TimelineScreen = ({ navigation }) => {
-//   const [appointments, setAppointments] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const fetchAppointments = async () => {
-//       try {
-//         const response = await fetch(API_URL);
-//         const data = await response.json();
-//        console.log(data);
-//         const formattedData = data.map((appointment) => ({
-//           id: appointment.id,
-//           title: appointment[0], // Title
-//           description: appointment[1], // Description
-//           date: appointment[2], // Date
-//           time: appointment[3], // Time
-//           location: appointment[4], // Location
-//           status: appointment[5], // Status (pending/completed)
-//         }));
-
-//         // Sort by date
-//         formattedData.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-//         setAppointments(formattedData);
-//       } catch (error) {
-//         console.error("Error fetching appointments:", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchAppointments();
-//   }, []);
-
-//   const getAppointmentColor = (status) => {
-//     return status === "completed" ? "#87CEFA" : "#FFC0CB"; // Blue for completed, Pink for pending
-//   };
-
-//   return (
-//     <View style={styles.container}>
-//       <View style={styles.header}>
-//         <TouchableOpacity onPress={() => navigation.goBack()}>
-//           <Ionicons name="arrow-back" size={24} color="black" />
-//         </TouchableOpacity>
-//         <Text style={styles.headerTitle}>Appointments</Text>
-//       </View>
-
-//       {loading ? (
-//         <ActivityIndicator size="large" color="#FF4081" style={{ marginTop: 50 }} />
-//       ) : (
-//         <FlatList
-//           data={appointments}
-//           keyExtractor={(item) => item.id.toString()}
-//           contentContainerStyle={{ paddingBottom: 20 }}
-//           renderItem={({ item, index }) => (
-//             <View style={styles.timelineContainer}>
-//               <View style={styles.timelineIndicator}>
-//                 <View style={[styles.circle, { backgroundColor: getAppointmentColor(item.status) }]} />
-//                 {index !== appointments.length - 1 && <View style={styles.line} />}
-//               </View>
-
-//               <View style={[styles.timelineItem, { backgroundColor: getAppointmentColor(item.status) }]}>
-//                 <Text style={styles.title}>{item.title}</Text>
-//                 <Text style={styles.description}>{item.description}</Text>
-//                 <Text style={styles.details}>📅 {item.date} | 🕒 {item.time}</Text>
-//                 <Text style={styles.details}>📍 {item.location}</Text>
-//               </View>
-//             </View>
-//           )}
-//         />
-//       )}
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: "#fff", paddingHorizontal: 20 },
-//   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 15 },
-//   headerTitle: { fontSize: 18, fontWeight: "bold" },
-//   timelineContainer: { flexDirection: "row", alignItems: "center", width: "100%", marginVertical: 5 },
-//   timelineIndicator: { alignItems: "center", marginRight: 10 },
-//   circle: { marginTop: 19, width: 12, height: 12, borderRadius: 6 },
-//   line: { width: 2, flex: 1, minHeight: 50, backgroundColor: "#D3D3D3", marginVertical: 5 },
-//   timelineItem: { flex: 1, padding: 15, borderRadius: 15, elevation: 3, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
-//   title: { fontSize: 16, fontWeight: "bold", color: "#333" },
-//   description: { fontSize: 14, color: "#666", marginTop: 5 },
-//   details: { fontSize: 12, color: "#888", marginTop: 2 },
-// });
-
-// export default TimelineScreen;

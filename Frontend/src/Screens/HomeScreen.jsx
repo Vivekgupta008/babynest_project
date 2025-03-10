@@ -10,27 +10,11 @@ import Icon from "react-native-vector-icons/Ionicons";
 import CustomHeader from "../Components/CustomHeader";
 import Svg, { Path, Circle } from "react-native-svg";
 import { useTheme } from '../theme/ThemeContext';
+import { BASE_URL } from '@env'
 
 export default function HomeScreen({navigation}) {
-
-  // const [appointments, setAppointments] = useState([
-  //   { id:1, title: "Initial Prenatal Visit - Week 6-8", completed: false },
-  //   { id:2, title: "First Trimester Screening - Week 10-13", completed: false },
-  //   { id:3, title: "Anatomy Scan - Week 18-22", completed: false },
-  //   { id:4, title: "Glucose Tolerance Test - Week 24-28", completed: false },
-  //   { id:5, title: "Routine Check-ups", completed: false },
-  //   { id:6, title: "Group B Strep Test - Week 35-37", completed: false },
-  // ]);
+  const [loading, setLoading] = useState(true);
   const { theme } = useTheme();
-  // [
-  //   { title: "Initial Prenatal Visit - Week 6-8", completed: false },
-  //   { title: "First Trimester Screening - Week 10-13", completed: false },
-  //   { title: "Anatomy Scan - Week 18-22", completed: false },
-  //   { title: "Glucose Tolerance Test - Week 24-28", completed: false },
-  //   { title: "Routine Check-ups", completed: false },
-  //   { title: "Group B Strep Test - Week 35-37", completed: false },
-  // ]
-
   const [appointments, setAppointments] = useState([]);
 
      // Dummy data for Due Appointments 
@@ -46,7 +30,7 @@ export default function HomeScreen({navigation}) {
 
   const getAppointments = async () => {
     try {
-        const response = await fetch('http://192.168.243.79:5000/get_appointments'); 
+        const response = await fetch(`${BASE_URL}/get_appointments`); 
         const data = await response.json();
         console.log("Response:", data);
         setAppointments(data);
