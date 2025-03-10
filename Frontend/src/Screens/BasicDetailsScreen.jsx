@@ -6,9 +6,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
+  SafeAreaView,
+  FlatList,
+  Modal
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Calendar } from "react-native-calendars";
+import { countries } from "../data/countries";
+
 
 export default function BasicDetailsScreen() {
   const navigation = useNavigation();
@@ -16,6 +21,7 @@ export default function BasicDetailsScreen() {
   // State for user inputs
   const [country, setCountry] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const [showCountryModal, setShowCountryModal] = useState(false);
 
   // Validation errors
   const [errors, setErrors] = useState({});
@@ -35,22 +41,60 @@ export default function BasicDetailsScreen() {
     }
   };
 
+  const handleSelectCountry = (selectedCountry) => {
+    setCountry(selectedCountry);
+    setShowCountryModal(false);
+    setErrors((prev) => ({ ...prev, country: "" }));
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Enter Your Details</Text>
 
       {/* Country Name Input */}
-      <Text style={styles.title1}>Enter Country</Text>
-      <TextInput
-        style={[styles.input, errors.country ? styles.errorBorder : null]}
-        placeholder=" Enter Your Country"
-        value={country}
-        onChangeText={(text) => {
-          setCountry(text);
-          setErrors((prev) => ({ ...prev, country: "" }));
-        }}
-      />
+      <Text style={styles.title1}>Select Country</Text>
+      <TouchableOpacity 
+        style={[styles.input, errors.country ? styles.errorBorder : null]} 
+        onPress={() => setShowCountryModal(true)}
+      >
+        <View style={styles.inputContainer}>
+          <Text style={country ? styles.inputText : styles.placeholderText}>
+            {country || "Select Your Country"}
+          </Text>
+          <Text style={styles.dropdownArrow}>▼</Text>
+        </View>
+      </TouchableOpacity>
       {errors.country ? <Text style={styles.errorText}>{errors.country}</Text> : null}
+      
+      <Modal
+        visible={showCountryModal}
+        animationType="slide"
+        transparent={true}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select a Country</Text>
+            <FlatList
+              data={countries}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.countryItem}
+                  onPress={() => handleSelectCountry(item)}
+                >
+                  <Text style={styles.countryText}>{item}</Text>
+                </TouchableOpacity>
+              )}
+            />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowCountryModal(false)}
+            >
+              <Text style={styles.closeButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
 
       {/* Calendar */}
       <Text style={styles.title1}>Select your Due Date</Text>
@@ -68,7 +112,7 @@ export default function BasicDetailsScreen() {
 
       {/* Disclaimer */}
       <Text style={styles.disclaimer}>
-         We are collecting this information solely to provide accurate AI-generated insights based on your pregnancy duration.
+          We are collecting this information solely to provide accurate AI-generated insights based on your pregnancy duration.
       </Text>
 
       {/* Continue Button */}
@@ -108,6 +152,60 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     fontSize: 16,
     placeholderTextColor: "#fff",
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dropdownArrow: {
+    fontSize: 14,
+    color: "#999",
+  },
+  inputText: {
+    fontSize: 16,
+    color: "#000",
+  },
+  placeholderText: {
+    fontSize: 16,
+    color: "#999",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    margin: 20,
+    borderRadius: 10,
+    padding: 20,
+    maxHeight: "80%",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  countryItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  countryText: {
+    fontSize: 16,
+  },
+  closeButton: {
+    marginTop: 15,
+    padding: 12,
+    backgroundColor: "#ff4081",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
   row: {
     flexDirection: "row",
