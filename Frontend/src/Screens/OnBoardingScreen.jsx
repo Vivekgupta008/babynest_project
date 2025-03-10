@@ -220,8 +220,10 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "100%",
+    alignItems: "center",
     position: "absolute",
+    bottom: scale(20),
+    width: "100%",
     paddingHorizontal: scale(20),
   },
   skipText: {
