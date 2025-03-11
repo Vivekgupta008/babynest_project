@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,8 @@ import {
   ActivityIndicator,
   TextInput,
   Button,
-  Alert
+  Alert,
+  RefreshControl
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Modal } from "react-native-paper";
@@ -30,9 +31,11 @@ const TimelineScreen = ({ navigation }) => {
   const [selectedTask, setSelectedTask] = useState({ id: "", title: "", content: "" });
   const [newAppointment, setNewAppointment] = useState({ title: "", content: "", appointment_date: "", appointment_time: "", appointment_location: "" });
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchTasks = async () => {
     try {
+      setRefreshing(true);
       const response = await fetch(`${BASE_URL}/get_tasks`);
       const data = await response.json();
       console.log("Raw Data from Backend:", data);
@@ -64,6 +67,7 @@ const TimelineScreen = ({ navigation }) => {
       console.error("Error fetching appointments:", error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -71,6 +75,10 @@ const TimelineScreen = ({ navigation }) => {
     fetchTasks();
   }, []);
 
+  const handleRefresh = () => {
+    fetchTasks();
+  }
+  
   const markTaskAsDone = async (taskId) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     try {
@@ -189,7 +197,9 @@ const TimelineScreen = ({ navigation }) => {
       {loading ? (
         <ActivityIndicator size="large" color="#FF4081" style={{ marginTop: 50 }} />
       ) : (
-        <FlatList
+        <FlatList refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
           data={tasks}
           keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
           contentContainerStyle={{ paddingBottom: 20 }}
@@ -222,7 +232,7 @@ const TimelineScreen = ({ navigation }) => {
                       }}
                       pointerEvents={item.isAppointmentMade === 1 ? "none" : "auto"}
                     >
-                      <Text style={styles.doneButtonText}>{item.isAppointmentMade === 1 ? "Appointment already made" : "Make an Appointment"}</Text>
+                      <Text style={styles.doneButtonText}>{item.isAppointmentMade === 1 ? "Appointment made" : "Make an Appointment"}</Text>
                     </TouchableOpacity>
                   </View>
                 )}

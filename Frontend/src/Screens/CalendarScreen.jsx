@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, TextInput, ScrollView, Animated, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, ScrollView, Animated, TouchableOpacity, StyleSheet,RefreshControl } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Toast from 'react-native-toast-message';
@@ -30,7 +30,8 @@ const ScheduleScreen = () => {
   const [selectedAppointment, setSelectedAppointment] = useState({ title: "", start: 8.00, end: 9.00 });
   const [appointments, setAppointments] = useState([]);
   const [newAppointment, setNewAppointment] = useState({ title: "", content: "", appointment_date: "", appointment_time: "", appointment_location: "" });
-  
+  const [refreshing, setRefreshing] = useState(false);
+
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
@@ -46,14 +47,20 @@ const ScheduleScreen = () => {
 
   const fetchAppointments = async () => {
     try {
+      setRefreshing(true);
       const response = await fetch(`${BASE_URL}/get_appointments`);
       const data = await response.json();
 
-      console.log("Response:", data);
       setAppointments(data);
     } catch (error) {
       console.error("Error fetching appointments:", error);
+    }finally{
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchAppointments();
   };
 
   const handleDateConfirm = (date) => {
@@ -182,7 +189,9 @@ const ScheduleScreen = () => {
         ))}
       </ScrollView>
 
-      <ScrollView ref={scrollRef} style={styles.scheduleContainer}>
+      <ScrollView ref={scrollRef} style={styles.scheduleContainer} refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }>
         <View style={styles.scheduleList}>
           {Array.from({ length: 13 }, (_, i) => 8 + i).map((hour) => (
             <View key={hour} style={[styles.scheduleItem, { height: timeSlotHeight }]}>
