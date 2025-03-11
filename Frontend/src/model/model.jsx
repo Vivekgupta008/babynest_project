@@ -5,13 +5,8 @@ import RNFS from "react-native-fs";
 import axios from "axios";
 import { ProgressBar } from "react-native-paper";
 import DeviceInfo from "react-native-device-info"; 
+import {MODEL_NAME, HF_TO_GGUF, GGUF_FILE} from '@env'
 
-// ✅ Use Qwen Model
-const MODEL_NAME = "Qwen2-0.5B-Instruct";
-const HF_TO_GGUF = {
-  "Qwen2-0.5B-Instruct": "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
-};
-const GGUF_FILE = "qwen2.5-0.5b-instruct-q4_k_m.gguf";
 
 const App = () => {
   const [availableGGUFs, setAvailableGGUFs] = useState([]);
