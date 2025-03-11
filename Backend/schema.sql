@@ -20,3 +20,16 @@ CREATE TABLE tasks (
     task_priority TEXT CHECK(task_priority IN ('low', 'medium', 'high')) DEFAULT 'low',
     isOptional BOOLEAN DEFAULT FALSE
 );
+
+CREATE TABLE user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    user_location TEXT NOT NULL,
+    baby_name TEXT,
+    expected_due_date DATE NOT NULL,
+    fundal_height_waist_size TEXT,
+    weights TEXT CHECK(json_valid(weights)), 
+    other_health_stuff TEXT
+);
+
