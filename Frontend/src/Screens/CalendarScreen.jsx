@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Text, TextInput, ScrollView, Animated, TouchableOpacity, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import Toast from 'react-native-toast-message';
 import { Modal } from "react-native-paper";
 import { BASE_URL } from '@env';
 
@@ -29,7 +30,7 @@ const ScheduleScreen = () => {
   const [selectedAppointment, setSelectedAppointment] = useState({ title: "", start: 8.00, end: 9.00 });
   const [appointments, setAppointments] = useState([]);
   const [newAppointment, setNewAppointment] = useState({ title: "", content: "", appointment_date: "", appointment_time: "", appointment_location: "" });
-
+  
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
@@ -90,10 +91,29 @@ const ScheduleScreen = () => {
         setAddAppointmentModalVisible(false);
         setNewAppointment({ title: "", content: "", appointment_date: "", appointment_time: "", appointment_location: "" });
         fetchAppointments();
+
+        Toast.show({
+          type: "success",
+          text1: "Appointment added successfully!",
+          visibilityTime: 1000,
+          position: "bottom",
+        });
       } else {
+        Toast.show({
+          type: "error",
+          text1: data.error || "Something went wrong!",
+          visibilityTime: 1000,
+          position: "bottom",
+        });
         console.log("Error", data.error || "Something went wrong!");
       }
     } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Error adding appointment!",
+        visibilityTime: 1000,
+        position: "bottom",
+      });
       console.error("Error adding appointment:", error);
     }
   };
@@ -106,7 +126,10 @@ const ScheduleScreen = () => {
   const showCalendar = () => setCalendarVisible(true);
   const hideCalendar = () => setCalendarVisible(false);
   const showAddAppointmentModal = () => setAddAppointmentModalVisible(true);
-  const hideAddAppointmentModal = () => setAddAppointmentModalVisible(false);
+  const hideAddAppointmentModal = () => {
+    setAddAppointmentModalVisible(false);
+    setNewAppointment({ title: "", content: "", appointment_date: "", appointment_time: "", appointment_location: "" });
+  }
 
   const handleAppointment = (appt) => {
     setModalOpen(true);
@@ -114,8 +137,8 @@ const ScheduleScreen = () => {
   };
 
   const closeModals = () => {
-    setModalOpen(false);
     setAddAppointmentModalVisible(false);
+    setNewAppointment({ title: "", content: "", appointment_date: "", appointment_time: "", appointment_location: "" });
   }
 
   // Filter appointments based on selected date
@@ -234,7 +257,7 @@ const ScheduleScreen = () => {
           <TouchableOpacity onPress={addAppointment}>
             <Text style={styles.modalSaveButton}>Save</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={closeModals}>
+          <TouchableOpacity onPress={hideAddAppointmentModal}>
             <Text style={styles.modalCancelButton}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -242,7 +265,7 @@ const ScheduleScreen = () => {
 
       <DateTimePickerModal
         isVisible={isCalendarVisible}
-        mode="date"
+        mode="datetime"
         minimumDate={new Date()}
         onConfirm={handleDateConfirm}
         onCancel={hideCalendar}

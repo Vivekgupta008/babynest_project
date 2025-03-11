@@ -33,7 +33,7 @@ export default function HomeScreen({navigation}) {
         const response = await fetch(`${BASE_URL}/get_appointments`); 
         const data = await response.json();
         console.log("Response:", data);
-        setAppointments(data);
+        setAppointments(data.splice(0, 2));
     } catch (error) {
         console.error('Error fetching appointments:', error);
     } finally {
