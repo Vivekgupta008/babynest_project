@@ -23,8 +23,8 @@ import { BASE_URL } from '@env';
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
 const TimelineScreen = ({ navigation }) => {
+  const flatListRef = useRef(null);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
@@ -68,8 +68,15 @@ const TimelineScreen = ({ navigation }) => {
         return a.week_start - b.week_start;
       });
 
-
       setTasks(formattedData);
+      
+      // Find the index of the first non-completed task and scroll to it
+      const firstPendingIndex = formattedData.findIndex(task => task.status !== "completed");
+      if (firstPendingIndex !== -1 && flatListRef.current) {
+        setTimeout(() => {
+          flatListRef.current.scrollToIndex({ index: firstPendingIndex, animated: true, viewPosition: 0.5 });
+        }, 100);
+      }
     } catch (error) {
       console.error("Error fetching appointments:", error);
     } finally {
@@ -204,9 +211,9 @@ const TimelineScreen = ({ navigation }) => {
       {loading ? (
         <ActivityIndicator size="large" color="#FF4081" style={{ marginTop: 50 }} />
       ) : (
-        <FlatList refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-          }
+        <FlatList 
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+          ref={flatListRef}
           data={tasks}
           keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
           contentContainerStyle={{ paddingBottom: 20 }}
