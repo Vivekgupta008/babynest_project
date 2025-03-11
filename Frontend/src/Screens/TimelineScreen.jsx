@@ -53,11 +53,18 @@ const TimelineScreen = ({ navigation }) => {
         isAppointmentMade: task.isAppointmentMade
       }));
 
-      console.log("Formatted Data:", formattedData);
-
       formattedData.sort((a, b) => {
         if (a.status === "completed" && b.status !== "completed") return -1;
         if (a.status !== "completed" && b.status === "completed") return 1;
+        if (a.status === "completed" && b.status === "completed") return a.week_start - b.week_start;
+        else{
+          if(a.isAppointmentMade === 1 && b.isAppointmentMade !== 1) return -1;
+          if(a.isAppointmentMade !== 1 && b.isAppointmentMade === 1) return 1;
+          else{
+            if(a.priority === b.priority) return a.week_start - b.week_start;
+            return b.priority - a.priority;
+          }
+        }
         return a.week_start - b.week_start;
       });
 
@@ -211,7 +218,10 @@ const TimelineScreen = ({ navigation }) => {
               </View>
 
               <View style={[styles.timelineItem, { backgroundColor: getTaskColor(item.status) }]}>
-                <Text style={styles.title}>{item.title}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Text style={styles.title}>{item.title}</Text>
+                  {item.isOptional === 1 && <Ionicons name="star" size={8} color="purple" style={{ marginLeft: 5 }} />}
+                </View>
                 <Text style={styles.description}>{item.description}</Text>
                 <Text style={styles.details}>📅 Week {item.week_start} - Week {item.week_end}</Text>
                 <Text style={styles.details}> Priority : {item.priority}</Text>

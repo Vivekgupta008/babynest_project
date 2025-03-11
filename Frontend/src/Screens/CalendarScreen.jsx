@@ -8,7 +8,7 @@ import { BASE_URL } from '@env';
 
 const days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const colors = ["#FDE68A", "#BFDBFE", "#FECACA", "#D1FAE5"]
-
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const generateWeekDates = (startDate) => {
   let weekDates = [];
   for (let i = 0; i < 7; i++) {
@@ -17,6 +17,12 @@ const generateWeekDates = (startDate) => {
     weekDates.push(date);
   }
   return weekDates;
+};
+
+const changeDateFormat = (date) => {
+  if (!date) return "";
+  const [year, month, day] = date.split("-");
+  return `${day} ${months[month - 1]}, ${year}`;
 };
 
 const ScheduleScreen = () => {
@@ -386,9 +392,9 @@ const ScheduleScreen = () => {
 
       <Modal visible={isModalOpen} onDismiss={() => setModalOpen(false)} contentContainerStyle={styles.modal}>
         <Text style={styles.modalTitle}>{selectedAppointment.title}</Text>
-        <Text style={styles.modalDescription}>{selectedAppointment.content}</Text>
-        <Text style={styles.modalDate}>{selectedAppointment.appointment_date}</Text>
-        <Text style={styles.modalTime}>{selectedAppointment.time}</Text>
+        <Text style={styles.modalContent}>{selectedAppointment.content}</Text>
+        <Text style={styles.modalDate}>{changeDateFormat(selectedAppointment.appointment_date)}</Text>
+        <Text>{selectedAppointment.time}</Text>
         <Text style={styles.modalLocation}>{selectedAppointment.appointment_location}</Text>
         <View style={{ flexDirection: "row", gap: 10, justifyContent: "flex-end", marginTop: 10 }}>
           <TouchableOpacity onPress={() => handleEditAppointment(selectedAppointment)}> 
