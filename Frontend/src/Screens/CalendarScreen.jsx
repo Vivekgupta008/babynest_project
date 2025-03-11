@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, TextInput, ScrollView, Animated, TouchableOpacity, StyleSheet,RefreshControl } from "react-native";
+import { View, Text, TextInput, ScrollView, Animated, TouchableOpacity, StyleSheet, RefreshControl } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Toast from 'react-native-toast-message';
@@ -31,6 +31,9 @@ const ScheduleScreen = () => {
   const [appointments, setAppointments] = useState([]);
   const [newAppointment, setNewAppointment] = useState({ title: "", content: "", appointment_date: "", appointment_time: "", appointment_location: "" });
   const [refreshing, setRefreshing] = useState(false);
+  const [isDateSelectorVisible, setDateSelectorVisible] = useState(false);
+  const [isEditAppointmentModalVisible, setEditAppointmentModalVisible] = useState(false);
+  const [editAppointment, setEditAppointment] = useState({ title: "", content: "", appointment_date: "", appointment_time: "", appointment_location: "" });
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -51,10 +54,12 @@ const ScheduleScreen = () => {
       const response = await fetch(`${BASE_URL}/get_appointments`);
       const data = await response.json();
 
-      setAppointments(data);
+      if (JSON.stringify(data) !== JSON.stringify(appointments)) {
+        setAppointments(data);
+      }
     } catch (error) {
       console.error("Error fetching appointments:", error);
-    }finally{
+    } finally {
       setRefreshing(false);
     }
   };
@@ -69,17 +74,28 @@ const ScheduleScreen = () => {
       return;
     }
 
+    let appointmentTime = "";
     const appointmentDate = date.toISOString().split("T")[0];
-    const appointmentTime = date.toTimeString().split(" ")[0].slice(0, 5);
+    if(!isDateSelectorVisible){
+      appointmentTime = date.toTimeString().split(" ")[0].slice(0, 5);
+    }
 
-    setNewAppointment({
-      ...newAppointment,
+    setNewAppointment((prevState) => ({
+      ...prevState,
       appointment_date: appointmentDate,
       appointment_time: appointmentTime,
-    });
+    }));
+
+    setEditAppointment((prevState) => ({
+      ...prevState,
+      appointment_date: appointmentDate,
+      appointment_time: appointmentTime,
+    }));
 
     setWeekDates(generateWeekDates(date));
+    setSelectedDate(date);
     hideCalendar();
+    setDateSelectorVisible(false);
   };
 
   const addAppointment = async () => {
@@ -125,6 +141,86 @@ const ScheduleScreen = () => {
     }
   };
 
+  const handleDeleteAppointment = async (id) => {
+    try {
+      const response = await fetch(`${BASE_URL}/delete_appointment/${id}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        Toast.show({
+          type: "success",
+          text1: "Appointment deleted successfully!",
+          visibilityTime: 1000,
+          position: "bottom",
+        });
+        fetchAppointments();
+      } else {
+        Toast.show({
+          type: "error",
+          text1: data.error || "Something went wrong!",
+          visibilityTime: 1000,
+          position: "bottom",
+        });
+        console.log("Error", data.error || "Something went wrong!");
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Error deleting appointment!",
+        visibilityTime: 1000,
+        position: "bottom",
+      });
+      console.error("Error deleting appointment:", error);
+    } finally {
+      setModalOpen(false);
+    }
+  };
+
+  const handleEditAppointment = (appt) => {
+    setEditAppointmentModalVisible(true);
+    setEditAppointment(appt);
+  };
+
+  const handleSaveEditAppointment = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/update_appointment/${editAppointment.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },  
+        body: JSON.stringify(editAppointment),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        Toast.show({
+          type: "success",
+          text1: "Appointment updated successfully!",
+          visibilityTime: 1000,  
+          position: "bottom",
+        });
+        fetchAppointments();
+      } else {
+        Toast.show({
+          type: "error",
+          text1: data.error || "Something went wrong!",
+          visibilityTime: 1000,  
+          position: "bottom",
+        });  
+        console.log("Error", data.error || "Something went wrong!");
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Error updating appointment!",  
+        visibilityTime: 1000,  
+        position: "bottom",
+      });
+      console.error("Error updating appointment:", error);
+    } finally {
+      setEditAppointmentModalVisible(false);
+      setEditAppointment({ title: "", content: "", appointment_date: "", appointment_time: "", appointment_location: "" });
+    }
+  };
+      
   const to_min = (str) => {
     const [hours, minutes] = str.split(":");
     return parseInt(hours) * 60 + parseInt(minutes.split(" ")[0]);
@@ -166,7 +262,7 @@ const ScheduleScreen = () => {
           {selectedDate.toLocaleString('default', { month: 'long' })} {selectedDate.getFullYear()}
         </Text>
         <View style={{ flexDirection: "row" }}>
-          <TouchableOpacity onPress={showCalendar}>
+          <TouchableOpacity onPress={() => setDateSelectorVisible(true)}>
             <Icon name="calendar" size={24} color="#3D5A80" style={styles.icon} />
           </TouchableOpacity>
           <TouchableOpacity onPress={showAddAppointmentModal}>
@@ -190,8 +286,8 @@ const ScheduleScreen = () => {
       </ScrollView>
 
       <ScrollView ref={scrollRef} style={styles.scheduleContainer} refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }>
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }>
         <View style={styles.scheduleList}>
           {Array.from({ length: 13 }, (_, i) => 8 + i).map((hour) => (
             <View key={hour} style={[styles.scheduleItem, { height: timeSlotHeight }]}>
@@ -240,7 +336,7 @@ const ScheduleScreen = () => {
             placeholderTextColor="black"
             style={styles.modalApp}
             editable={false}
-            value={newAppointment.appointment_date} 
+            value={newAppointment.appointment_date}
           />
         </TouchableOpacity>
 
@@ -250,7 +346,7 @@ const ScheduleScreen = () => {
             placeholderTextColor="black"
             style={styles.modalApp}
             editable={false}
-            value={newAppointment.appointment_time} 
+            value={newAppointment.appointment_time}
           />
         </TouchableOpacity>
 
@@ -279,6 +375,83 @@ const ScheduleScreen = () => {
         onConfirm={handleDateConfirm}
         onCancel={hideCalendar}
       />
+
+      <DateTimePickerModal
+        isVisible={isDateSelectorVisible}
+        mode="date"
+        minimumDate={new Date()}
+        onConfirm={handleDateConfirm}
+        onCancel={() => setDateSelectorVisible(false)}
+      />
+
+      <Modal visible={isModalOpen} onDismiss={() => setModalOpen(false)} contentContainerStyle={styles.modal}>
+        <Text style={styles.modalTitle}>{selectedAppointment.title}</Text>
+        <Text style={styles.modalDescription}>{selectedAppointment.content}</Text>
+        <Text style={styles.modalDate}>{selectedAppointment.appointment_date}</Text>
+        <Text style={styles.modalTime}>{selectedAppointment.time}</Text>
+        <Text style={styles.modalLocation}>{selectedAppointment.appointment_location}</Text>
+        <View style={{ flexDirection: "row", gap: 10, justifyContent: "flex-end", marginTop: 10 }}>
+          <TouchableOpacity onPress={() => handleEditAppointment(selectedAppointment)}> 
+            <Text style={styles.modalSaveButton}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleDeleteAppointment(selectedAppointment.id)}>
+            <Text style={styles.modalCancelButton}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
+      <Modal visible={isEditAppointmentModalVisible} onDismiss={() => setEditAppointmentModalVisible(false)} contentContainerStyle={styles.modal}>
+        <Text style={styles.modalTitle}>{"Edit appointment"}</Text>
+        <TextInput
+          placeholder="Title"
+          placeholderTextColor="black"
+          style={styles.modalApp}
+          value={editAppointment.title}
+          onChangeText={(text) => setEditAppointment({ ...editAppointment, title: text })}
+        />
+        <TextInput
+          placeholder="Description"
+          placeholderTextColor="black"          
+          style={[styles.modalApp, styles.descriptionInput]}
+          value={editAppointment.content}
+          onChangeText={(text) => setEditAppointment({ ...editAppointment, content: text })}
+        />
+        <TouchableOpacity onPress={showCalendar}>
+          <TextInput
+            placeholder="Select Date"
+            placeholderTextColor="black"
+            style={styles.modalApp}
+            editable={false}            
+            value={editAppointment.appointment_date}
+          />
+        </TouchableOpacity> 
+
+        <TouchableOpacity onPress={showCalendar}>
+          <TextInput
+            placeholder="Select Time"            
+            placeholderTextColor="black"
+            style={styles.modalApp}
+            editable={false}
+            value={editAppointment.appointment_time}            
+          />
+        </TouchableOpacity>
+
+        <TextInput
+          placeholder="Location"
+          placeholderTextColor="black"          
+          style={styles.modalApp}
+          value={editAppointment.appointment_location}
+          onChangeText={(text) => setEditAppointment({ ...editAppointment, appointment_location: text })}
+        />
+        <View style={{ flexDirection: "row", gap: 10, justifyContent: "flex-end", marginTop: 10 }}>
+          <TouchableOpacity onPress={handleSaveEditAppointment}>
+            <Text style={styles.modalSaveButton}>Save</Text>
+          </TouchableOpacity> 
+          <TouchableOpacity onPress={() => setEditAppointmentModalVisible(false)}>
+            <Text style={styles.modalCancelButton}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 };
