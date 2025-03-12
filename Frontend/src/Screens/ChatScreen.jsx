@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { 
   View, Text, TextInput, TouchableOpacity, FlatList, 
-  StyleSheet, Animated, Alert, ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback
+  StyleSheet, Animated, Alert, ActivityIndicator, Keyboard, 
+  KeyboardAvoidingView, Platform, TouchableWithoutFeedback 
 } from "react-native";
+import Clipboard from "@react-native-clipboard/clipboard";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import { fetchAvailableGGUFs, downloadModel, generateResponse } from "../model/model";
@@ -16,7 +18,7 @@ export default function ChatScreen() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [userInput, setUserInput] = useState("");
-  const flatListRef = useRef(null); // Ref for auto-scrolling
+  const flatListRef = useRef(null);
 
   useEffect(() => {
     const loadModel = async () => {
@@ -29,8 +31,10 @@ export default function ChatScreen() {
           console.log(`Found model ${GGUF_FILE}, downloading...`);
           setIsDownloading(true);
           setProgress(0);
+
           await downloadModel(GGUF_FILE, setProgress);
           setIsDownloading(false);
+
           console.log("Model downloaded successfully!");
         } else {
           console.warn("Model file not found in Hugging Face repo.");
@@ -51,11 +55,11 @@ export default function ChatScreen() {
 
     const userMessage = { id: Date.now().toString(), role: "user", content: userInput };
     const updatedConversation = [...conversation, userMessage];
+    
     setConversation(updatedConversation);
     setUserInput("");
     setIsGenerating(true);
 
-    // Auto-scroll to bottom
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
 
     try {
@@ -63,8 +67,6 @@ export default function ChatScreen() {
       if (response) {
         const botMessage = { id: (Date.now() + 1).toString(), role: "assistant", content: response };
         setConversation([...updatedConversation, botMessage]);
-
-        // Ensure the chat stays scrolled to the latest message
         setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
       }
     } catch (error) {
@@ -75,60 +77,72 @@ export default function ChatScreen() {
     }
   };
 
+  const handleCopyMessage = (message) => {
+    Clipboard.setString(message);
+    Alert.alert("Copied", "Message copied to clipboard!");
+  };
+
+  const handlePaste = async () => {
+    const text = await Clipboard.getString();
+    setUserInput(text);
+  };
+
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === "ios" ? "padding" : "height"} 
-      style={styles.container}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.container}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Icon name="arrow-back" size={24} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Chat with BabyNest AI</Text>
-          </View>
-
-          {/* Chat Messages */}
-          <FlatList
-            ref={flatListRef}
-            data={conversation}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={[styles.messageContainer, item.role === "user" ? styles.userMessage : styles.botMessage]}>
-                <Text style={styles.messageText}>{item.content}</Text>
-              </View>
-            )}
-            contentContainerStyle={styles.chatArea}
-            showsVerticalScrollIndicator={false}
-          />
-
-          {/* Typing Indicator */}
-          {isGenerating && (
-            <View style={[styles.messageContainer, styles.botMessage]}>
-              <TypingIndicator />
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Chat with BabyNest AI</Text>
+      </View>
+  
+      {/* Chat Messages */}
+      <FlatList
+        ref={flatListRef}
+        data={conversation}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TouchableOpacity onLongPress={() => handleCopyMessage(item.content)}>
+            <View style={[styles.messageContainer, item.role === "user" ? styles.userMessage : styles.botMessage]}>
+              <Text style={styles.messageText}>{item.content}</Text>
             </View>
-          )}
-
-          {/* Input Field */}
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Type a message..."
-              placeholderTextColor="#888"
-              value={userInput}
-              onChangeText={setUserInput}
-              onFocus={() => setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100)}
-            />
-            <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage} disabled={isGenerating}>
-              <Icon name="send" size={24} color="#fff" />
-            </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
+        )}
+        contentContainerStyle={styles.chatArea}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      />
+  
+      {/* Typing Indicator */}
+      {isGenerating && (
+        <View style={[styles.messageContainer, styles.botMessage]}>
+          <TypingIndicator />
         </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+      )}
+  
+      {/* Input Field */}
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "position" : undefined}>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Type a message..."
+            placeholderTextColor="#888"
+            value={userInput}
+            onChangeText={setUserInput}
+            onFocus={() => setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100)}
+          />
+          <TouchableOpacity style={styles.pasteButton} onPress={handlePaste}>
+            <Icon name="content-paste" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage} disabled={isGenerating}>
+            <Icon name="send" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </View>
   );
+  
 }
 
 // Typing Indicator (Minimalist Dots Animation)
@@ -185,7 +199,7 @@ const styles = StyleSheet.create({
   },
   userMessage: {
     alignSelf: "flex-end",
-    backgroundColor: "#ff4081",
+    backgroundColor: "#F36196",
   },
   botMessage: {
     alignSelf: "flex-start",
@@ -210,8 +224,13 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     backgroundColor: "#f8f8f8",
   },
+  pasteButton: {
+    marginHorizontal: 5,
+    backgroundColor: "#ff4081",
+    padding: 10,
+    borderRadius: 25,
+  },
   sendButton: {
-    marginLeft: 10,
     backgroundColor: "#ff4081",
     padding: 10,
     borderRadius: 25,
