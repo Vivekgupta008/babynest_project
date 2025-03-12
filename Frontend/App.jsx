@@ -55,8 +55,8 @@ export default function App() {
           <NavigationContainer>
           <SafeAreaView style={{ flex: 1 }}>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
-              {/* <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-              <Stack.Screen name="BasicDetails" component={BasicDetailsScreen} /> */}
+              <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+              <Stack.Screen name="BasicDetails" component={BasicDetailsScreen} />
               
               {/* Main App after onboarding */}
               <Stack.Screen name="MainTabs" component={BottomTabs} />

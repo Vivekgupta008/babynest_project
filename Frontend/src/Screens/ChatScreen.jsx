@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { 
-  View, Text, TextInput, TouchableOpacity, FlatList, 
-  StyleSheet, Animated, Alert, ActivityIndicator, Keyboard, 
-  KeyboardAvoidingView, Platform, TouchableWithoutFeedback 
+import {
+  View, Text, TextInput, TouchableOpacity, FlatList,
+  StyleSheet, Animated, Alert, ActivityIndicator, Keyboard,
+  KeyboardAvoidingView, Platform, TouchableWithoutFeedback
 } from "react-native";
 import Clipboard from "@react-native-clipboard/clipboard";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import { fetchAvailableGGUFs, downloadModel, generateResponse } from "../model/model";
 import { GGUF_FILE } from "@env";
+import Markdown from "react-native-markdown-display";
 
 export default function ChatScreen() {
   const navigation = useNavigation();
@@ -55,7 +56,7 @@ export default function ChatScreen() {
 
     const userMessage = { id: Date.now().toString(), role: "user", content: userInput };
     const updatedConversation = [...conversation, userMessage];
-    
+
     setConversation(updatedConversation);
     setUserInput("");
     setIsGenerating(true);
@@ -79,7 +80,6 @@ export default function ChatScreen() {
 
   const handleCopyMessage = (message) => {
     Clipboard.setString(message);
-    Alert.alert("Copied", "Message copied to clipboard!");
   };
 
   const handlePaste = async () => {
@@ -96,7 +96,7 @@ export default function ChatScreen() {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Chat with BabyNest AI</Text>
       </View>
-  
+
       {/* Chat Messages */}
       <FlatList
         ref={flatListRef}
@@ -105,7 +105,11 @@ export default function ChatScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity onLongPress={() => handleCopyMessage(item.content)}>
             <View style={[styles.messageContainer, item.role === "user" ? styles.userMessage : styles.botMessage]}>
-              <Text style={styles.messageText}>{item.content}</Text>
+              {item.role === "assistant" ? (
+                <Markdown style={markdownStyles}>{item.content}</Markdown>
+              ) : (
+                <Text style={styles.messageText}>{item.content}</Text>
+              )}
             </View>
           </TouchableOpacity>
         )}
@@ -113,14 +117,14 @@ export default function ChatScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       />
-  
+
       {/* Typing Indicator */}
       {isGenerating && (
         <View style={[styles.messageContainer, styles.botMessage]}>
           <TypingIndicator />
         </View>
       )}
-  
+
       {/* Input Field */}
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "position" : undefined}>
         <View style={styles.inputContainer}>
@@ -144,7 +148,7 @@ export default function ChatScreen() {
       </KeyboardAvoidingView>
     </View>
   );
-  
+
 }
 
 // Typing Indicator (Minimalist Dots Animation)
@@ -253,3 +257,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
   },
 });
+
+const markdownStyles = {
+  body: { color: "#333", fontSize: 16 },
+  strong: { fontWeight: "bold" },
+  em: { fontStyle: "italic" },
+  blockquote: { backgroundColor: "#f1f1f1", padding: 5, borderLeftWidth: 3, borderLeftColor: "#ccc" },
+  code_block: { backgroundColor: "#eee", padding: 10, borderRadius: 5, fontFamily: "monospace" },
+  link: { color: "#ff4081", textDecorationLine: "underline" },
+  list_item: { marginVertical: 5 },
+};

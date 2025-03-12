@@ -3,19 +3,13 @@ import { initLlama, releaseAllLlama } from "llama.rn";
 import RNFS from "react-native-fs";
 import axios from "axios";
 import DeviceInfo from "react-native-device-info";
-// import {MODEL_NAME, HF_TO_GGUF, GGUF_FILE} from "@env";
-
-const MODEL_NAME = "Qwen2-0.5B-Instruct";
-const HF_TO_GGUF = {
-  "Qwen2-0.5B-Instruct": "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
-};
-const GGUF_FILE = "qwen2.5-0.5b-instruct-q4_k_m.gguf";
+import {MODEL_NAME, HF_TO_GGUF, GGUF_FILE} from "@env";
 
 let context = null;
 
 export const fetchAvailableGGUFs = async () => {
   try {
-    const repoPath = HF_TO_GGUF[MODEL_NAME];
+    const repoPath = HF_TO_GGUF;
     if (!repoPath) 
         throw new Error(`No repository mapping found for ${MODEL_NAME}`);
 
@@ -48,7 +42,7 @@ export const checkMemoryBeforeLoading = async (modelPath) => {
 };
 
 export const downloadModel = async (fileName, onProgress) => {
-  const downloadUrl = `https://huggingface.co/${HF_TO_GGUF[MODEL_NAME]}/resolve/main/${fileName}`;
+  const downloadUrl = `https://huggingface.co/${HF_TO_GGUF}/resolve/main/${fileName}`;
   const destPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
   if (await RNFS.exists(destPath)) {
