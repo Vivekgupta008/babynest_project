@@ -128,6 +128,8 @@ export default function ChatScreen() {
             style={styles.input}
             placeholder="Type a message..."
             placeholderTextColor="#888"
+            multiline
+            scrollEnabled
             value={userInput}
             onChangeText={setUserInput}
             onFocus={() => setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100)}

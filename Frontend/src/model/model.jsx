@@ -132,7 +132,7 @@ export const generateResponse = async (conversation) => {
   
       const result = await context.completion({
         messages: filteredConversation,
-        n_predict: 10000,
+        n_predict: 500,
         stop: stopWords
       });
   
