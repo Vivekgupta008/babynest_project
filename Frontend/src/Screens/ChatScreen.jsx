@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   View, Text, TextInput, TouchableOpacity, FlatList, 
-  StyleSheet, Animated, Alert, ActivityIndicator 
+  StyleSheet, Animated, Alert, ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
@@ -16,6 +16,7 @@ export default function ChatScreen() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [userInput, setUserInput] = useState("");
+  const flatListRef = useRef(null); // Ref for auto-scrolling
 
   useEffect(() => {
     const loadModel = async () => {
@@ -48,19 +49,23 @@ export default function ChatScreen() {
       return;
     }
 
-    // Append user message to the conversation
     const userMessage = { id: Date.now().toString(), role: "user", content: userInput };
     const updatedConversation = [...conversation, userMessage];
     setConversation(updatedConversation);
     setUserInput("");
     setIsGenerating(true);
 
+    // Auto-scroll to bottom
+    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+
     try {
-      // Generate AI response
       const response = await generateResponse(updatedConversation);
       if (response) {
         const botMessage = { id: (Date.now() + 1).toString(), role: "assistant", content: response };
         setConversation([...updatedConversation, botMessage]);
+
+        // Ensure the chat stays scrolled to the latest message
+        setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
       }
     } catch (error) {
       Alert.alert("Error", "Failed to generate response: " + error.message);
@@ -71,49 +76,58 @@ export default function ChatScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Chat with BabyNest AI</Text>
-      </View>
-
-      {/* Chat Messages */}
-      <FlatList
-        data={conversation}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={[styles.messageContainer, item.role === "user" ? styles.userMessage : styles.botMessage]}>
-            <Text style={styles.messageText}>{item.content}</Text>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"} 
+      style={styles.container}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Icon name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Chat with BabyNest AI</Text>
           </View>
-        )}
-        contentContainerStyle={styles.chatArea}
-        showsVerticalScrollIndicator={false}
-      />
 
-      {/* Typing Indicator */}
-      {isGenerating && (
-        <View style={[styles.messageContainer, styles.botMessage]}>
-          <TypingIndicator />
+          {/* Chat Messages */}
+          <FlatList
+            ref={flatListRef}
+            data={conversation}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={[styles.messageContainer, item.role === "user" ? styles.userMessage : styles.botMessage]}>
+                <Text style={styles.messageText}>{item.content}</Text>
+              </View>
+            )}
+            contentContainerStyle={styles.chatArea}
+            showsVerticalScrollIndicator={false}
+          />
+
+          {/* Typing Indicator */}
+          {isGenerating && (
+            <View style={[styles.messageContainer, styles.botMessage]}>
+              <TypingIndicator />
+            </View>
+          )}
+
+          {/* Input Field */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Type a message..."
+              placeholderTextColor="#888"
+              value={userInput}
+              onChangeText={setUserInput}
+              onFocus={() => setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100)}
+            />
+            <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage} disabled={isGenerating}>
+              <Icon name="send" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </View>
-      )}
-
-      {/* Input Field */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Type a message..."
-          placeholderTextColor="#888"
-          value={userInput}
-          onChangeText={setUserInput}
-        />
-        <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage} disabled={isGenerating}>
-          <Icon name="send" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
-    </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -158,18 +172,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginLeft: 10,
-  },
-  downloadContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 10,
-    backgroundColor: "#ffeeee",
-  },
-  downloadText: {
-    fontSize: 16,
-    color: "#ff4081",
-    marginRight: 10,
   },
   chatArea: {
     flexGrow: 1,
