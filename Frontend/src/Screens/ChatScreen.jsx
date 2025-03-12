@@ -18,6 +18,7 @@ export default function ChatScreen() {
   const [progress, setProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [userInput, setUserInput] = useState("");
   const flatListRef = useRef(null);
 
@@ -63,6 +64,7 @@ export default function ChatScreen() {
 
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
 
+
     try {
       const response = await generateResponse(updatedConversation);
       if (response) {
@@ -85,6 +87,11 @@ export default function ChatScreen() {
   const handlePaste = async () => {
     const text = await Clipboard.getString();
     setUserInput(text);
+  };
+
+  const scrollToBottom = () => {
+    flatListRef.current?.scrollToEnd({ animated: true });
+    setShowScrollToBottom(false);
   };
 
   return (
@@ -116,7 +123,20 @@ export default function ChatScreen() {
         contentContainerStyle={styles.chatArea}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        onScroll={(event) => {
+          const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+          const isBottom =
+            layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
+          setShowScrollToBottom(!isBottom);
+        }}
       />
+
+      {/* Floating Scroll to Bottom Button */}
+      {showScrollToBottom && (
+        <TouchableOpacity style={styles.scrollToBottomButton} onPress={scrollToBottom}>
+          <Icon name="keyboard-arrow-down" size={30} color="black" />
+        </TouchableOpacity>
+      )}
 
       {/* Typing Indicator */}
       {isGenerating && (
@@ -256,14 +276,48 @@ const styles = StyleSheet.create({
     backgroundColor: "#888",
     marginHorizontal: 2,
   },
+  scrollToBottomButton: {
+    position: "absolute",
+    bottom: 40,
+    right: '45%',
+    backgroundColor: "white",
+    padding: 5,
+    borderRadius: 30,
+    elevation: 5,
+    zIndex:1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });
 
 const markdownStyles = {
-  body: { color: "#333", fontSize: 16 },
-  strong: { fontWeight: "bold" },
-  em: { fontStyle: "italic" },
-  blockquote: { backgroundColor: "#f1f1f1", padding: 5, borderLeftWidth: 3, borderLeftColor: "#ccc" },
-  code_block: { backgroundColor: "#eee", padding: 10, borderRadius: 5, fontFamily: "monospace" },
-  link: { color: "#ff4081", textDecorationLine: "underline" },
-  list_item: { marginVertical: 5 },
+  body: { 
+    color: "#333", 
+    fontSize: 16 
+  },
+  strong: { 
+    fontWeight: "bold" 
+  },
+  em: { 
+    fontStyle: "italic" 
+  },
+  blockquote: { 
+    backgroundColor: "#f1f1f1", 
+    padding: 5, 
+    borderLeftWidth: 3, 
+    borderLeftColor: "#ccc" 
+  },
+  code_block: { 
+    backgroundColor: "#eee", 
+    padding: 10, 
+    borderRadius: 5, 
+    fontFamily: "monospace" 
+  },
+  link: { 
+    color: "#ff4081", 
+    textDecorationLine: "underline" 
+  },
+  list_item: { 
+    marginVertical: 5 
+  },
 };
