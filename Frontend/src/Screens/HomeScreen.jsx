@@ -1,7 +1,7 @@
 //COLOR PALLETE
 //F4D1FF FA9EBC 0B1957 5784E6
 
-import React, { useState,useRef } from "react";
+import React, { useState,useRef,useEffect } from "react";
 import { View, Text, TouchableOpacity, FlatList, StyleSheet,Animated, Modal, ScrollView,Dimensions,Image, Platform, SafeAreaView } from "react-native";
 import { Card, Button, TextInput,Divider } from "react-native-paper";
 import {LinearGradient} from "react-native-linear-gradient";
@@ -9,17 +9,13 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Icon from "react-native-vector-icons/Ionicons";
 import CustomHeader from "../Components/CustomHeader";
 import Svg, { Path, Circle } from "react-native-svg";
+import { useTheme } from '../theme/ThemeContext';
+import { BASE_URL } from '@env'
 
 export default function HomeScreen({navigation}) {
-
-  const [appointments, setAppointments] = useState([
-    { id:1, title: "Initial Prenatal Visit - Week 6-8", completed: false },
-    { id:2, title: "First Trimester Screening - Week 10-13", completed: false },
-    { id:3, title: "Anatomy Scan - Week 18-22", completed: false },
-    { id:4, title: "Glucose Tolerance Test - Week 24-28", completed: false },
-    { id:5, title: "Routine Check-ups", completed: false },
-    { id:6, title: "Group B Strep Test - Week 35-37", completed: false },
-  ]);
+  const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
+  const [appointments, setAppointments] = useState([]);
 
      // Dummy data for Due Appointments 
   const dueAppointments = [
@@ -31,6 +27,27 @@ export default function HomeScreen({navigation}) {
   const openDrawer = () => {
     navigation.openDrawer();
   };
+
+  const getAppointments = async () => {
+    try {
+        const response = await fetch(`${BASE_URL}/get_appointments`); 
+        const data = await response.json();
+        console.log("Response:", data);
+        setAppointments(data.splice(0, 2));
+    } catch (error) {
+        console.error('Error fetching appointments:', error);
+    } finally {
+        setLoading(false);
+    }
+};
+
+useEffect(() => {
+  console.log("hello");
+  console.log("appointments",appointments);
+    getAppointments();
+}, []);
+
+
 
   // Progress value between 0 and 1 (33 weeks out of 40 weeks)
   const progress = 33 / 40
@@ -91,6 +108,7 @@ export default function HomeScreen({navigation}) {
             />
           </Svg>  
           
+          {/* <Text style={[styles.name,{ color: theme.text}]}>Ishaan Gupta</Text> */}
           {/* Baby Image */}
            <View style={styles.babyImageContainer}>
             <Image source={require("../assets/Baby.jpeg")} style={styles.babyImage} />
@@ -98,12 +116,10 @@ export default function HomeScreen({navigation}) {
         </View>
 
       {/* SOS Button */}
-      {/* <View style={styles.sosContainer}>  */}
       <TouchableOpacity style={styles.sosButton} onPress={() => navigation.navigate("SOSAlert")}>
         <Icon name="call" size={22} color="white" />
         <Text style={styles.sosText}>SOS</Text>
       </TouchableOpacity>
-      {/* </View>  */}
         <View style={styles.weekContainer}>
            <WeekNumber number="31" />
            <WeekNumber number="32" />
@@ -128,12 +144,45 @@ export default function HomeScreen({navigation}) {
 
             {appointments.map((item) => (
               <View key={item.id}>
-              <View style={styles.listItem}>
-                <Text style={styles.noteText}>{item.title}</Text> 
-              </View>
-              { <Divider style={ styles.divider} />}
+              {/* <View style={styles.listItem}> */}
+                {/* <Text style={styles.noteText}>{item.title}</Text>  */}
+                <View style={{ padding: 5, borderBottomWidth: 1}}></View>
+                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.title}</Text>
+                            <Text>{item.content}</Text>
+                            <Text>Date: {item.appointment_date}</Text>
+                            <Text>Time: {item.appointment_time}</Text>
+                            <Text>Location: {item.appointment_location}</Text>
+                            <Text>Status: {item.appointment_status}</Text>
+              {/* </View> */}
+              {/* { <Divider style={ styles.divider} />} */}
               </View>
             ))}
+            {/* <FlatList
+              data={appointments.slice(0, 2)}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <>
+                <View style={styles.listItem}>
+                  <Text style={styles.noteText}>{item.title}</Text> 
+                </View>
+                { <Divider style={ styles.divider} />}
+                </>
+              )}
+            /> */}
+            {/* <FlatList
+                    data={appointments}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <View style={{ padding: 10, borderBottomWidth: 1 }}>
+                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.title}</Text>
+                            <Text>{item.content}</Text>
+                            <Text>Date: {item.appointment_date}</Text>
+                            <Text>Time: {item.appointment_time}</Text>
+                            <Text>Location: {item.appointment_location}</Text>
+                            <Text>Status: {item.appointment_status}</Text>
+                        </View>
+                    )}
+                /> */}
             <Button mode="contained" onPress={() => navigation.navigate("Calendar")} style={styles.addButton}>
               See More
 
@@ -220,6 +269,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: "bold",
+    color: "#333",
   },
   title: {
     fontSize: 20, 
@@ -275,7 +325,7 @@ const styles = StyleSheet.create({
   addButton: { 
     backgroundColor: "rgb(218,79,122)",
 
-    marginTop: -10,
+    marginTop: 10,
     marginBottom: 10 
 
   },

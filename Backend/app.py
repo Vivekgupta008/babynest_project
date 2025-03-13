@@ -14,5 +14,15 @@ app.register_blueprint(tasks_bp)
 def teardown_db(exception):
     close_db(exception)
 
+@app.route('/')
+def index():
+    from routes.appointments import get_appointments
+    from routes.tasks import get_tasks
+    appointment_db =  get_appointments()
+    task_db = get_tasks()
+    return appointment_db
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+   app.run(host='0.0.0.0', port=5000, debug=True)
+
+

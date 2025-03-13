@@ -1,3 +1,6 @@
+venv/
+pycache/
+__pycache__/
 env
-__pycache__
 db/database.db
+
