@@ -58,6 +58,7 @@ def update_task(task_id):
     
     try:
         data = request.json
+
         task = db.execute('SELECT * FROM tasks WHERE id = ?', (task_id,),).fetchone()
         db.execute(
             'UPDATE tasks SET title = ?, content = ?, starting_week = ?, ending_week = ?, task_status = ?, task_priority = ?, isOptional = ?, isAppointmentMade = ? WHERE id = ?',
@@ -116,13 +117,10 @@ def move_to_appointment(task_id):
 
         # add that task to appointments
         db.execute(
-            'INSERT INTO appointments (title, content, appointment_date, appointment_time, appointment_location, appointment_status) VALUES (?, ?, ?, ?, ?, ?)',
+            'INSERT INTO appointments (title, content, appointment_date, appointment_time, appointment_location, appointment_status) VALUES (?, ?, ?, ?, ?, ?)',y
             (appointment_title, appointment_content, appointment_date, appointment_time, appointment_location, 'pending')
         )
 
-        # delete that task from tasks
-        # db.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
-        
         db.commit()
         return jsonify({"status": "success", "message": "Task moved to appointment"}), 200
     
