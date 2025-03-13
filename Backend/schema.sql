@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS users;
+
 CREATE TABLE IF NOT EXISTS appointments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
@@ -10,6 +11,7 @@ CREATE TABLE IF NOT EXISTS appointments (
 );
 
 DROP TABLE IF EXISTS tasks;
+
 CREATE TABLE IF NOT EXISTS tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
@@ -54,3 +56,17 @@ INSERT INTO tasks (title, content, starting_week, ending_week, task_priority, is
 ('Hospital Tour', 'Visit maternity hospital to prepare for delivery.', 33, 34, 'low', TRUE,FALSE,'pending'),
 ('Labor Signs Monitoring', 'Educate about labor contractions and when to go to hospital.', 36, 40, 'high', FALSE,FALSE,'pending'),
 ('Final Checkups', 'Last medical assessments before labor.', 38, 40, 'high', FALSE,FALSE,'pending');
+
+
+CREATE TABLE user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    user_location TEXT NOT NULL,
+    baby_name TEXT,
+    expected_due_date DATE NOT NULL,
+    fundal_height_waist_size TEXT,
+    weights TEXT CHECK(json_valid(weights)), 
+    other_health_stuff TEXT
+);
+

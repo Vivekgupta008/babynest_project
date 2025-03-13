@@ -60,20 +60,20 @@ useEffect(() => {
     <>
     <SafeAreaView style={styles.container}>
         <View style={styles.gradientContainer}> 
-        <LinearGradient colors={["rgb(218,79,122)", "#fff"]} style={styles.gradient}> 
-          {/* <Svg height="100%" width="100%" style={styles.curve} viewBox={`0 0 ${width} 100`}>
-            <Path d={`M0 0 L${width} 0 L${width} 60 Q${width / 2} 100 0 60 Z`} fill="#FF758C" />
-          </Svg> */}
-         </LinearGradient>
-       </View>
+          <LinearGradient colors={["rgb(218,79,122)", "#fff"]} style={styles.gradient}> 
+            {/* <Svg height="100%" width="100%" style={styles.curve} viewBox={`0 0 ${width} 100`}>
+              <Path d={`M0 0 L${width} 0 L${width} 60 Q${width / 2} 100 0 60 Z`} fill="#FF758C" />
+            </Svg> */}
+          </LinearGradient>
+        </View>
        {/* <CustomHeader /> */}
-       <View style={styles.header}>
-               <TouchableOpacity
-                 onPress={openDrawer}
-                 style={styles.menuButton}
-               >
-                 <Icon name="menu" size={24} color="#fff" />
-               </TouchableOpacity>
+        <View style={styles.header}>
+              <TouchableOpacity
+                onPress={openDrawer}
+                style={styles.menuButton}
+              >
+                <Icon name="menu" size={24} color="#fff" />
+              </TouchableOpacity>
        
                <TouchableOpacity
                  onPress={() => navigation.navigate('Settings')}
