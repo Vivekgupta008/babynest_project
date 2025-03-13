@@ -221,7 +221,7 @@ const WeekNumber = ({ number, active = false }) => (
   </View>
 )
 
-const { width } = Dimensions.get("window");
+const { width,height } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
 
@@ -355,18 +355,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     // backgroundColor: "#5784E6",
+    justifyContent: "center",
+    overflow: "hidden",
     padding: 15,
     borderRadius: 10,
     marginRight: 10,
-    height: 100,
-    width: width * 0.4,
+    height:Math.min(height * 0.15, 110),
+    width: width * 0.45,
     minWidth: 150,
   },
   dueText: {
-    fontSize: 16,
+    fontSize: width * 0.040,
     color: "#fff",
     textAlign: "center",
-    width: "100%",
+    maxWidth: "100%",
+    flexWrap: "wrap",
+    paddingHorizontal: 5,
   },
 
   //floating chatbot button
