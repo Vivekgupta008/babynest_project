@@ -2,7 +2,7 @@
 //F4D1FF FA9EBC 0B1957 5784E6
 
 import React, { useState,useRef,useEffect } from "react";
-import { View, Text, TouchableOpacity, FlatList, StyleSheet,Animated, Modal, ScrollView,Dimensions,Image, Platform, SafeAreaView } from "react-native";
+import { View, Text, TouchableOpacity, FlatList, StyleSheet,Animated, Modal, ScrollView,Dimensions,Image, Platform, SafeAreaView, ActivityIndicator } from "react-native";
 import { Card, Button, TextInput,Divider } from "react-native-paper";
 import {LinearGradient} from "react-native-linear-gradient";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
@@ -30,7 +30,7 @@ export default function HomeScreen({navigation}) {
 
   const getAppointments = async () => {
     try {
-        const response = await fetch(`${BASE_URL}/get_appointments`); 
+        const response = await fetch(`http://192.168.1.7:5000/get_appointments`); 
         const data = await response.json();
         console.log("Response:", data);
         setAppointments(data.splice(0, 2));
@@ -60,7 +60,7 @@ useEffect(() => {
     <>
     <SafeAreaView style={styles.container}>
         <View style={styles.gradientContainer}> 
-          <LinearGradient colors={["rgb(218,79,122)", "#fff"]} style={styles.gradient}> 
+          <LinearGradient colors={[theme.primary, theme.background]} style={styles.gradient}> 
             {/* <Svg height="100%" width="100%" style={styles.curve} viewBox={`0 0 ${width} 100`}>
               <Path d={`M0 0 L${width} 0 L${width} 60 Q${width / 2} 100 0 60 Z`} fill="#FF758C" />
             </Svg> */}
@@ -88,7 +88,7 @@ useEffect(() => {
         {/* <View style={styles.progressContainer}>  */}
           {/* Fixed upper section to match design */}
         <View style={styles.upperSection}>
-          <Text style={styles.title}>16th Week of Pregnancy</Text>
+          <Text style={[styles.title,{ color: theme.text}]}>16th Week of Pregnancy</Text>
 
           <View style={styles.progressCircleContainer}>
            <Svg height={200} width={200} style={styles.progressCircle}>
@@ -116,9 +116,9 @@ useEffect(() => {
         </View>
 
       {/* SOS Button */}
-      <TouchableOpacity style={styles.sosButton} onPress={() => navigation.navigate("SOSAlert")}>
-        <Icon name="call" size={22} color="white" />
-        <Text style={styles.sosText}>SOS</Text>
+      <TouchableOpacity style={[styles.sosButton,{ backgroundColor: theme.button}]} onPress={() => navigation.navigate("SOSAlert")}>
+        <Icon name="call" size={22} style={[styles.sosIcon,{ color: theme.iconText}]} />
+        <Text style={[styles.sosText,{ color: theme.iconText}]}>SOS</Text>
       </TouchableOpacity>
         <View style={styles.weekContainer}>
            <WeekNumber number="31" />
@@ -129,60 +129,36 @@ useEffect(() => {
          </View>
 
         {/* Fact Card */}
-        <LinearGradient colors={["rgb(246,199,210)", "rgb(249, 234, 234)"]} style={styles.factCard}>
+        <LinearGradient colors={[theme.factcardprimary, theme.factcardsecondary]} style={styles.factCard}>
           <Card.Content>
-            <Text style={styles.factText}>
+            <Text style={[styles.factText,{ color: theme.text}]}>
               During pregnancy, the heart grows in size to pump up to 50% more blood for both mother and baby.
             </Text>
           </Card.Content>
         </LinearGradient>
 
         {/* Appointments */}
-        <LinearGradient colors={["#fce4ec", "#fce4ec"]} style={styles.appointmentCard}>
+        <LinearGradient colors={[theme.appointment,theme.appointment]} style={styles.appointmentCard}>
           <Card.Title title="Appointments" titleStyle={styles.cardTitle}/>
           <Card.Content>
 
-            {appointments.map((item) => (
-              <View key={item.id}>
-              {/* <View style={styles.listItem}> */}
-                {/* <Text style={styles.noteText}>{item.title}</Text>  */}
-                <View style={{ padding: 5, borderBottomWidth: 1}}></View>
-                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.title}</Text>
-                            <Text>{item.content}</Text>
-                            <Text>Date: {item.appointment_date}</Text>
-                            <Text>Time: {item.appointment_time}</Text>
-                            <Text>Location: {item.appointment_location}</Text>
-                            <Text>Status: {item.appointment_status}</Text>
-              {/* </View> */}
-              {/* { <Divider style={ styles.divider} />} */}
-              </View>
-            ))}
-            {/* <FlatList
-              data={appointments.slice(0, 2)}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <>
-                <View style={styles.listItem}>
-                  <Text style={styles.noteText}>{item.title}</Text> 
+          {loading ? (
+            <ActivityIndicator size="large" color="#FF4081" style={{ marginTop: 5 }} />
+              ) : (
+               <>
+              {appointments.map((item) => (
+                <View key={item.id}>
+                  <View style={{ padding: 5, borderBottomWidth: 1 }}></View>
+                  <Text style={{ fontSize: 18, fontWeight: "bold" }}>{item.title}</Text>
+                  <Text>{item.content}</Text>
+                  <Text>Date: {item.appointment_date}</Text>
+                  <Text>Time: {item.appointment_time}</Text>
+                  <Text>Location: {item.appointment_location}</Text>
+                  <Text>Status: {item.appointment_status}</Text>
                 </View>
-                { <Divider style={ styles.divider} />}
-                </>
-              )}
-            /> */}
-            {/* <FlatList
-                    data={appointments}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <View style={{ padding: 10, borderBottomWidth: 1 }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.title}</Text>
-                            <Text>{item.content}</Text>
-                            <Text>Date: {item.appointment_date}</Text>
-                            <Text>Time: {item.appointment_time}</Text>
-                            <Text>Location: {item.appointment_location}</Text>
-                            <Text>Status: {item.appointment_status}</Text>
-                        </View>
-                    )}
-                /> */}
+              ))}
+            </>
+          )}
             <Button mode="contained" onPress={() => navigation.navigate("Calendar")} style={styles.addButton}>
               See More
 
@@ -196,7 +172,7 @@ useEffect(() => {
             <Text style={styles.sectionTitle}>Upcoming / Due Tasks</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
               {dueAppointments.map((item, index) => (
-                <LinearGradient  key={index} colors={["rgb(35,79,147)", "rgb(90,110,203)"]} style={styles.dueItem}>
+                <LinearGradient  key={index} colors={[theme.cardBackgroundprimary, theme.cardBackgroundsecondary]} style={styles.dueItem}>
                 <View>
                   <Text style={styles.dueText}>{item}</Text>
                 </View>
@@ -206,7 +182,7 @@ useEffect(() => {
           </View>
           </ScrollView>
 
-        <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.navigate('Chat')}>
+        <TouchableOpacity style={[styles.floatingButton,{ backgroundColor: theme.iconBackground}]} onPress={() => navigation.navigate('Chat')}>
 
           <MaterialIcons name="smart-toy" size={30} color="#fff" />
         </TouchableOpacity>
@@ -339,7 +315,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 20,
     right: 20,
-    backgroundColor: "#ff4081",
     padding: 15,
     borderRadius: 50,
     elevation: 5,
@@ -384,19 +359,11 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
 
-  //sos feature
-// sosContainer:{ 
-//   flex: 1, 
-//   justifyContent: "center", 
-//   alignItems: "center", 
-//   backgroundColor: "rgb(218,79,122)", 
-//   marginBottom: 10 
-// },
+
 sosButton: { 
   position: "absolute",
   top: 120, // Adjusted position to match the image better
   right: 15,
-  backgroundColor: "rgb(218,79,122)", 
   paddingHorizontal: 10, 
   paddingVertical: 6,
   borderRadius: 20, 
@@ -405,7 +372,7 @@ sosButton: {
   zIndex:100,
 },
 sosText: { 
-  color: "white", 
+  // color: "white", 
   fontSize: 14, 
   fontWeight: "bold", 
   marginLeft: 5 
