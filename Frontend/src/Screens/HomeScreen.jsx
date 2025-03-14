@@ -424,7 +424,7 @@ divider: {
     top: 0,
     left: 0,
     right: 0,
-    height: "35%",
+    height: "63%",
   },
   gradient: {
     flex: 1,

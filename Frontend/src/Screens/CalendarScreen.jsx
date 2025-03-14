@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, TextInput, ScrollView, Animated, TouchableOpacity, StyleSheet, RefreshControl } from "react-native";
+import { View, Text, TextInput, ScrollView, Animated, TouchableOpacity, StyleSheet, RefreshControl, SafeAreaView } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Toast from 'react-native-toast-message';
@@ -262,7 +262,7 @@ const ScheduleScreen = () => {
   const timeSlotHeight = 80;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>
           {selectedDate.toLocaleString('default', { month: 'long' })} {selectedDate.getFullYear()}
@@ -458,104 +458,108 @@ const ScheduleScreen = () => {
           </TouchableOpacity>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F8F8",
-    padding: 20,
-    paddingTop: 40
+  container: { 
+    flex: 1, 
+    //backgroundColor: "#F8F8F8",
+    padding: 10, 
+    marginHorizontal: 20,
+    paddingTop: 40 
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20
+  header: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    alignItems: "center", 
+    marginBottom: 20, 
+    gap: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 12
   },
-  headerText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#3D5A80"
+  headerText: { 
+    fontSize: 20, 
+    fontWeight: "bold", 
+    color: "#3D5A80" 
   },
-  icon: {
+  icon: { 
     marginRight: 10
   },
-  weekDatesScroll: {
-    flexDirection: "row",
-    marginBottom: 20
+  weekDatesScroll: { 
+    flexDirection: "row", 
+    marginBottom: 20 
   },
-  dateItem: {
-    alignItems: "center",
-    marginHorizontal: 15
+  dateItem: { 
+    alignItems: "center", 
+    marginHorizontal: 15 
   },
-  dayText: {
+  dayText: { 
+    fontSize: 14, 
+    color: "#3D5A80" 
+  },
+  dateText: { 
+    fontSize: 18, 
+    fontWeight: "bold", 
+    color: "#3D5A80" 
+  },
+  selectedText: { 
+    color: "#FF6B6B" 
+  },
+  selectedDot: { 
+    width: 5, 
+    height: 5, 
+    backgroundColor: "#FF6B6B", 
+    borderRadius: 5, 
+    marginTop: 5 
+  },
+  scheduleContainer: { 
+    flex: 1, 
+    marginTop: -500 
+  },
+  scheduleList: { 
+    flex: 1, 
+    paddingVertical: 10 
+  },
+  scheduleItem: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    borderBottomWidth: 1, 
+    borderBottomColor: "#ddd" 
+  },
+  timeText: { 
+    width: 50, 
     fontSize: 14,
-    color: "#3D5A80"
-  },
-  dateText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#3D5A80"
-  },
-  selectedText: {
-    color: "#FF6B6B"
-  },
-  selectedDot: {
-    width: 5,
-    height: 5,
-    backgroundColor: "#FF6B6B",
-    borderRadius: 5,
-    marginTop: 5
-  },
-  scheduleContainer: {
-    flex: 1,
-    marginTop: -500
-  },
-  scheduleList: {
-    flex: 1,
-    paddingVertical: 10
-  },
-  scheduleItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd"
-  },
-  timeText: {
-    width: 50,
-    fontSize: 14,
-    color: "#3D5A80"
+    color: "#3D5A80" 
 
   },
-  scheduleLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#ddd"
+  scheduleLine: { 
+    flex: 1, 
+    height: 1, 
+    backgroundColor: "#ddd" 
 
   },
-  appointment: {
-    position: "absolute",
-    left: 60,
-    right: 20,
-    borderRadius: 10,
-    padding: 15,
-    elevation: 3
+  appointment: { 
+    position: "absolute", 
+    left: 60, 
+    right: 20, 
+    borderRadius: 10, 
+    padding: 15, 
+    elevation: 3 
 
   },
-  apptTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#3D5A80"
+  apptTitle: { 
+    fontSize: 16, 
+    fontWeight: "bold", 
+    color: "#3D5A80" 
 
   },
-  apptTime: {
-    fontSize: 14,
-    color: "#6B7280"
+  apptTime: { 
+    fontSize: 14, 
+    color: "#6B7280" 
   },
-  modal: {
+  modal:{
     backgroundColor: "#fff",
     padding: 20,
     width: "80%",
@@ -569,6 +573,7 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   modalApp: {
+    color: "#333",
     marginBottom: 10,
     borderBottomWidth: 1,
     borderColor: "#ccc",
@@ -578,17 +583,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#ff4081",
     padding: 10,
     borderRadius: 5,
-    color: "white",
-    textAlign: "center",
+    color: "white", 
+    textAlign: "center", 
     marginTop: 10
   },
   modalCancelButton: {
     backgroundColor: "white",
     padding: 10,
     borderRadius: 5,
-    color: "gray",
-    textAlign: "center",
-    marginTop: 10
+    color: "gray", 
+    textAlign: "center", 
+    marginTop: 10 
   }
 });
 
