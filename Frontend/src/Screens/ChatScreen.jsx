@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, FlatList,
   StyleSheet, Animated, Alert, ActivityIndicator, Keyboard,
-  KeyboardAvoidingView, Platform, TouchableWithoutFeedback
+  KeyboardAvoidingView, Platform, TouchableWithoutFeedback,
+  SafeAreaView
 } from "react-native";
 import Clipboard from "@react-native-clipboard/clipboard";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -95,7 +96,7 @@ export default function ChatScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -166,7 +167,7 @@ export default function ChatScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 
 }
