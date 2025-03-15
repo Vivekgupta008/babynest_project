@@ -18,28 +18,29 @@ const themes = {
     appointment: '#fce4ec'
   },
   light: {
-    primary: '#5271FF', 
+    primary: '#d4a373', 
     background: '#fff', 
-    text: '#333333', 
-    cardBackgroundprimary: '#DDE4F0', 
-    cardBackgroundsecondary: '#E3EAF5', 
-    iconBackground: '#E3F2FD', 
-    button: '#5271FF', 
-    factcardprimary: '#F3E6E8', 
-    factcardsecondary: '#FAF3F4', 
-    appointment: '#F8E8EC' 
+    text: 'rgb(0,0,0)', 
+    cardBackgroundprimary: '#ccd5ae', 
+    cardBackgroundsecondary: '#ccd5ae', 
+    iconBackground: '#d4a373', 
+    button: '#d4a373', 
+    factcardprimary: '#e9edc9', 
+    factcardsecondary: '#e9edc9', 
+    appointment: '#faedcd' 
   },
   dark: {
-    primary: '#A9A9A9', 
+    primary: '#9e2a2b', 
     background: '#fff', 
-    text: '#E0E0E0', 
-    cardBackgroundprimary: '#2A2A2A', 
-    cardBackgroundsecondary: '#3A3A3A', 
-    iconBackground: '#4A4A4A', 
-    button: '#A9A9A9', 
-    factcardprimary: '#343434', 
-    factcardsecondary: '#4A4A4A', 
-    appointment: '#2D2D2D' 
+    text: 'fff3b0', 
+    cardBackgroundprimary: '#e09f3e', 
+    cardBackgroundsecondary: '#e09f3e', 
+    iconBackground: '#9e2a2b', 
+    iconText: 'fff3b0',
+    button: '#fff3b0', 
+    factcardprimary: '#e09f3e', 
+    factcardsecondary: '#e09f3e', 
+    appointment: '#9e2a2b' 
   },
   pastel: {
     primary: '#CFA7C8',

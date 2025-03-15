@@ -139,7 +139,7 @@ useEffect(() => {
 
         {/* Appointments */}
         <LinearGradient colors={[theme.appointment,theme.appointment]} style={styles.appointmentCard}>
-          <Card.Title title="Appointments" titleStyle={styles.cardTitle}/>
+          <Card.Title title="Appointments" titleStyle={[styles.cardTitle,{ color: theme.text}]}/>
           <Card.Content>
 
           {loading ? (
@@ -159,7 +159,7 @@ useEffect(() => {
               ))}
             </>
           )}
-            <Button mode="contained" onPress={() => navigation.navigate("Calendar")} style={styles.addButton}>
+            <Button mode="contained" onPress={() => navigation.navigate("Calendar")} style={[styles.addButton,{ backgroundColor: theme.button}]}>
               See More
 
             </Button>
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    // color: "#333",
   },
   title: {
     fontSize: 20, 
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   addButton: { 
-    backgroundColor: "rgb(218,79,122)",
+    // backgroundColor: "rgb(218,79,122)",
 
     marginTop: 10,
     marginBottom: 10 
@@ -311,15 +311,6 @@ const styles = StyleSheet.create({
     color: "rgba(0, 0, 0, 0.8)",
     marginBottom: 10,
   },
-    floatingButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    padding: 15,
-    borderRadius: 50,
-    elevation: 5,
-    zIndex: 999,
-  },
 
      // Due Appointments
   horizontalScroll: {
@@ -329,7 +320,6 @@ const styles = StyleSheet.create({
   dueItem: {
     flexDirection: "row",
     alignItems: "center",
-    // backgroundColor: "#5784E6",
     justifyContent: "center",
     overflow: "hidden",
     padding: 15,
@@ -353,7 +343,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 20,
     right: 20,
-    backgroundColor: "#0B1957",
     padding: 15,
     borderRadius: 50,
     elevation: 5,
@@ -372,7 +361,6 @@ sosButton: {
   zIndex:100,
 },
 sosText: { 
-  // color: "white", 
   fontSize: 14, 
   fontWeight: "bold", 
   marginLeft: 5 
