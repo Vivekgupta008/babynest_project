@@ -6,6 +6,7 @@ import DeviceInfo from "react-native-device-info";
 import {MODEL_NAME, HF_TO_GGUF, GGUF_FILE} from "@env";
 
 let context = null;
+const faqCache = new Map();
 
 export const fetchAvailableGGUFs = async () => {
   try {
@@ -87,7 +88,7 @@ export const loadModel = async (modelName) => {
 
     context = await initLlama({
         model: destPath, 
-        n_ctx: 2048,
+        n_ctx: 512,
         n_gpu_layers: 0 
     });
 
@@ -103,7 +104,18 @@ export const generateResponse = async (conversation) => {
       Alert.alert("Model Not Loaded", "Please load the model first.");
       return null;
     }
-  
+    const userLastMessage = conversation
+    .filter((msg) => msg.role === "user")
+    .slice(-1)[0]?.content
+    .trim()
+    .toLowerCase();
+
+    // Return cached answer if it exists
+    if (faqCache.has(userLastMessage)) {
+      console.log("Using cached response for:", userLastMessage);
+      return faqCache.get(userLastMessage);
+    }
+
     const stopWords = [
       "</s>", 
       "<|end|>", 
@@ -132,11 +144,14 @@ export const generateResponse = async (conversation) => {
   
       const result = await context.completion({
         messages: filteredConversation,
-        n_predict: 500,
+        n_predict: 200,
         stop: stopWords
       });
   
       const response = result?.text?.trim();
+      if (userLastMessage && response) {
+        faqCache.set(userLastMessage, response);
+      }
       return response;
 
     } catch (error) {
@@ -145,4 +160,50 @@ export const generateResponse = async (conversation) => {
     }
   };
   
-
+  export const streamResponse = async (conversation, onToken) => {
+    if (!context) {
+      Alert.alert("Model Not Loaded", "Please load the model first.");
+      return;
+    }
+  
+    const stopWords = [
+      "</s>", "<|end|>", "user:", "assistant:",
+      "<|im_end|>", "<|eot_id|>", "<|end▁of▁sentence|>"
+    ];
+  
+    const filteredConversation = [
+      {
+        role: "system",
+        content: "You are a highly specialized AI assistant focused on pregnancy-related topics. " +
+          "Your expertise includes maternal health, fetal development, prenatal care, and pregnancy well-being. " +
+          "- Provide responses that are concise, clear, and easy to understand. " +
+          "- Maintain a warm, empathetic, and supportive tone to reassure users. " +
+          "- Prioritize factual, evidence-based information while keeping answers short. " +
+          "- If a question is outside pregnancy-related topics, gently redirect the user to relevant discussions. " +
+          "- Avoid unnecessary details, deliver crisp, to-the-point answers with care and compassion."
+      },
+      ...conversation,
+    ];
+  
+    try {
+      let fullText = "";
+  
+      await context.completion({
+        messages: filteredConversation,
+        stream: true,
+        stop: stopWords,
+        onToken: (token) => {
+          fullText += token;
+          onToken(token);
+        },
+      });
+  
+      const lastUser = conversation.filter(m => m.role === "user").slice(-1)[0]?.content.trim().toLowerCase();
+      if (lastUser && fullText.trim()) {
+        faqCache.set(lastUser, fullText.trim());
+      }
+    } catch (error) {
+      Alert.alert("Error During Stream", error.message || "An unknown error occurred.");
+    }
+  };
+  

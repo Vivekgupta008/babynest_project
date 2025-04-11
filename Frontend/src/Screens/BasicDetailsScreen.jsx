@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -8,43 +8,58 @@ import {
   Platform,
   SafeAreaView,
   FlatList,
-  Modal
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { Calendar } from "react-native-calendars";
-import { countries } from "../data/countries";
-
+  Modal,
+} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {Calendar} from 'react-native-calendars';
+import {countries} from '../data/countries';
+import {BASE_URL} from '@env';
 
 export default function BasicDetailsScreen() {
   const navigation = useNavigation();
 
   // State for user inputs
-  const [country, setCountry] = useState("");
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const [country, setCountry] = useState('');
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split('T')[0],
+  );
   const [showCountryModal, setShowCountryModal] = useState(false);
 
   // Validation errors
   const [errors, setErrors] = useState({});
 
   // Validate inputs
-  const handleContinue = () => {
+  const handleContinue = async () => {
     let newErrors = {};
 
     if (!country.trim()) {
-      newErrors.country = "Country is required";
+      newErrors.country = 'Country is required';
     }
 
     setErrors(newErrors);
+    console.log(selectedDate);
 
-    if (Object.keys(newErrors).length === 0) {
-      navigation.replace("MainTabs");
+    const res = await fetch(`${BASE_URL}/set_profile`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({location: country, due_date: selectedDate}),
+    });
+    const data = await res.json();
+    console.log("data", data);
+
+    if (data.error) {
+      newErrors.country = data.error;
+      setErrors(newErrors);
+    } else {
+      setErrors({});
+      navigation.replace('MainTabs');
     }
   };
 
-  const handleSelectCountry = (selectedCountry) => {
-    setCountry(selectedCountry);
+  const handleSelectCountry = selectedCountry => {
+    setCountry(selectedCountry);  
     setShowCountryModal(false);
-    setErrors((prev) => ({ ...prev, country: "" }));
+    setErrors(prev => ({...prev, country: ''}));
   };
 
   return (
@@ -53,43 +68,41 @@ export default function BasicDetailsScreen() {
 
       {/* Country Name Input */}
       <Text style={styles.title1}>Select Country</Text>
-      <TouchableOpacity 
-        style={[styles.input, errors.country ? styles.errorBorder : null]} 
-        onPress={() => setShowCountryModal(true)}
-      >
+      <TouchableOpacity
+        style={[styles.input, errors.country ? styles.errorBorder : null]}
+        onPress={() => setShowCountryModal(true)}>
         <View style={styles.inputContainer}>
           <Text style={country ? styles.inputText : styles.placeholderText}>
-            {country || "Select Your Country"}
+            {country || 'Select Your Country'}
           </Text>
           <Text style={styles.dropdownArrow}>▼</Text>
         </View>
       </TouchableOpacity>
-      {errors.country ? <Text style={styles.errorText}>{errors.country}</Text> : null}
-      
+      {errors.country ? (
+        <Text style={styles.errorText}>{errors.country}</Text>
+      ) : null}
+
       <Modal
         visible={showCountryModal}
         animationType="slide"
-        transparent={true}
-      >
+        transparent={true}>
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select a Country</Text>
             <FlatList
               data={countries}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
+              keyExtractor={item => item}
+              renderItem={({item}) => (
                 <TouchableOpacity
                   style={styles.countryItem}
-                  onPress={() => handleSelectCountry(item)}
-                >
+                  onPress={() => handleSelectCountry(item)}>
                   <Text style={styles.countryText}>{item}</Text>
                 </TouchableOpacity>
               )}
             />
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={() => setShowCountryModal(false)}
-            >
+              onPress={() => setShowCountryModal(false)}>
               <Text style={styles.closeButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -101,18 +114,22 @@ export default function BasicDetailsScreen() {
       <View style={styles.calendarContainer}>
         <Calendar
           current={selectedDate}
-          onDayPress={(day) => setSelectedDate(day.dateString)}
-          markedDates={{ [selectedDate]: { selected: true, selectedColor: "#ff4081" } }}
+          minDate={new Date().toISOString().split('T')[0]}
+          onDayPress={day => setSelectedDate(day.dateString)}
+          markedDates={{
+            [selectedDate]: {selected: true, selectedColor: '#ff4081'},
+          }}
           theme={{
-            todayTextColor: "#ff4081",
-            arrowColor: "#ff4081",
+            todayTextColor: '#ff4081',
+            arrowColor: '#ff4081',
           }}
         />
       </View>
 
       {/* Disclaimer */}
       <Text style={styles.disclaimer}>
-          We are collecting this information solely to provide accurate AI-generated insights based on your pregnancy duration.
+        We are collecting this information solely to provide accurate
+        AI-generated insights based on your pregnancy duration.
       </Text>
 
       {/* Continue Button */}
@@ -127,31 +144,30 @@ export default function BasicDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 30,
-    textAlign: "center",
-    
+    textAlign: 'center',
   },
   title1: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 10,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     padding: 12,
     borderRadius: 10,
     marginBottom: 10,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     fontSize: 16,
-    placeholderTextColor: "#fff",
+    placeholderTextColor: '#fff',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -160,38 +176,38 @@ const styles = StyleSheet.create({
   },
   dropdownArrow: {
     fontSize: 14,
-    color: "#999",
+    color: '#999',
   },
   inputText: {
     fontSize: 16,
-    color: "#000",
+    color: '#000',
   },
   placeholderText: {
     fontSize: 16,
-    color: "#999",
+    color: '#999',
   },
   modalContainer: {
     flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     margin: 20,
     borderRadius: 10,
     padding: 20,
-    maxHeight: "80%",
+    maxHeight: '80%',
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 15,
-    textAlign: "center",
+    textAlign: 'center',
   },
   countryItem: {
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: '#eee',
   },
   countryText: {
     fontSize: 16,
@@ -199,53 +215,51 @@ const styles = StyleSheet.create({
   closeButton: {
     marginTop: 15,
     padding: 12,
-    backgroundColor: "#ff4081",
+    backgroundColor: '#ff4081',
     borderRadius: 10,
-    alignItems: "center",
+    alignItems: 'center',
   },
   closeButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    color: '#fff',
+    fontWeight: 'bold',
   },
   row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   halfInput: {
-    width: "48%",
+    width: '48%',
   },
   errorBorder: {
-    borderColor: "red",
+    borderColor: 'red',
   },
   errorText: {
-    color: "red",
+    color: 'red',
     marginBottom: 10,
   },
   disclaimer: {
     fontSize: 14,
-    color: "#555",
-    textAlign: "center",
+    color: '#555',
+    textAlign: 'center',
     marginTop: 20,
     marginBottom: 20,
   },
   button: {
-    backgroundColor: "#ff4081",
+    backgroundColor: '#ff4081',
     padding: 15,
     borderRadius: 10,
-    alignItems: "center",
+    alignItems: 'center',
   },
   buttonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
-  calendarContainer: { 
+  calendarContainer: {
     borderRadius: 10,
-    overflow: "hidden",
-    backgroundColor: "#f5f5f5",
+    overflow: 'hidden',
+    backgroundColor: '#f5f5f5',
     padding: 10,
-    marginBottom: 20
-   },
+    marginBottom: 20,
+  },
 });
-
-

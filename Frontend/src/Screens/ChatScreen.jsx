@@ -22,7 +22,7 @@ export default function ChatScreen() {
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [userInput, setUserInput] = useState("");
   const flatListRef = useRef(null);
-
+  
   useEffect(() => {
     const loadModel = async () => {
       try {
@@ -150,6 +150,7 @@ export default function ChatScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "position" : undefined}>
         <View style={styles.inputContainer}>
           <TextInput
+
             style={styles.input}
             placeholder="Type a message..."
             placeholderTextColor="#888"
