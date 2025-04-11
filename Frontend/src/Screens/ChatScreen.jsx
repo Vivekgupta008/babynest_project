@@ -11,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import { fetchAvailableGGUFs, downloadModel, generateResponse } from "../model/model";
 import { GGUF_FILE } from "@env";
 import Markdown from "react-native-markdown-display";
+import {BASE_URL} from "@env";
 
 export default function ChatScreen() {
   const navigation = useNavigation();
@@ -67,9 +68,26 @@ export default function ChatScreen() {
 
 
     try {
-      const response = await generateResponse(updatedConversation);
-      if (response) {
-        const botMessage = { id: (Date.now() + 1).toString(), role: "assistant", content: response };
+      const apiRes = await fetch(`${BASE_URL}/ask`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: userInput }),
+      });
+  
+      const json = await apiRes.json();
+  
+      let reply = "";
+  
+      if (json.response) {
+        // Backend RAG handled it
+        reply = json.response;
+      } else if (json.fallback) {
+        // Use local model as fallback
+        reply = await generateResponse(updatedConversation);
+      }
+
+      if (reply) {
+        const botMessage = { id: (Date.now() + 1).toString(), role: "assistant", content: reply };
         setConversation([...updatedConversation, botMessage]);
         setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
       }
