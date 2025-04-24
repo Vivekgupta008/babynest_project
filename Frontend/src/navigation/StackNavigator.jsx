@@ -14,6 +14,7 @@ import WeightScreen from '../Screens/WeightScreen';
 import MoodScreen from '../Screens/MoodScreen';
 import MedicineScreen from '../Screens/MedicineScreen';
 import SymptomsScreen from '../Screens/SymptomsScreen';
+import DueDateScreen from '../Screens/DueDateScreen';
 
 const Stack = createStackNavigator();
 
@@ -24,6 +25,7 @@ export default function StackNavigation() {
         {/* Optional onboarding screens */}
         <Stack.Screen name="Onboarding" component={OnBoardingScreen} />
         <Stack.Screen name="BasicDetails" component={BasicDetailsScreen} />
+        <Stack.Screen name="DueDate" component={DueDateScreen} />
 
         {/* Main tabbed UI */}
         <Stack.Screen name="MainTabs" component={BottomTabs} />
