@@ -76,6 +76,22 @@ export default function CustomDrawer({ children }) {
           <TouchableOpacity onPress={() => navigateTo('Symptoms')} style={styles.link}>
             <Text>Symptoms Tracking</Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigateTo('Sleep')} style={styles.link}>
+            <Text>Sleep Tracking</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigateTo('Stress')} style={styles.link}>
+            <Text>Stress Tracking</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigateTo('BloodPressure')} style={styles.link}>
+            <Text>Blood Pressure Tracking</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigateTo('UrineTest')} style={styles.link}>
+            <Text>Urine Test Tracking</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigateTo('Discharge')} style={styles.link}>
+            <Text>Discharge Tracking</Text>
+          </TouchableOpacity>
+          
 
           <View style={styles.logoutContainer}>
             <TouchableOpacity onPress={handleLogout}>
@@ -121,6 +137,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: 'red',
+    marginTop: 20,
     fontWeight: 'bold',
     fontSize: 16,
   },

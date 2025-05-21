@@ -51,8 +51,8 @@ def get_profile():
             return jsonify({"error": "Profile not found"}), 404
         
         return jsonify({
-            "due_date": profile[1],
-            "location": profile[2]
+            "due_date": profile[7],
+            "location": profile[6]
         }), 200
     
     except sqlite3.OperationalError:

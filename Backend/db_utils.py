@@ -15,7 +15,7 @@ def calculate_current_week(due_date_str):
 def get_due_date():
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT due_date FROM profile LIMIT 1")
+    cur.execute("SELECT dueDate FROM profile LIMIT 1")
     row = cur.fetchone()
     conn.close()
     return row[0] if row else None
@@ -44,7 +44,7 @@ def get_tasks_this_week(week):
     conn.close()
     if not rows:
         return "No tasks for this week."
-    return "Tasks:\n" + "\n".join([f"• {r[0]} (Weeks {r[1]}–{r[2]})" for r in rows])
+    return "Tasks:\n" + "\n".join([f"• {r[0]} (Weeks {r[1]} {r[2]})" for r in rows])
 
 def get_weight_weeks_ago(current_week, weeks_ago):
     target_week = current_week - weeks_ago

@@ -1,7 +1,7 @@
-// Screens/DueDateScreen.jsx
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import LottieView from 'lottie-react-native';
 
 export default function DueDateScreen() {
   const navigation = useNavigation();
@@ -11,15 +11,28 @@ export default function DueDateScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       navigation.replace('MainTabs');
-    }, 3000);
+    }, 4000);
 
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <View style={styles.container}>
+      <LottieView
+        source={require('../assets/animations/celebration.json')}
+        autoPlay
+        loop={false}
+        style={styles.animation}
+      />
       <Text style={styles.message}>Your expected due date is:</Text>
-      <Text style={styles.date}>{dueDate || 'Not available'}</Text>
+      <Text style={styles.date}>
+        {dueDate ? new Date(dueDate).toLocaleDateString('en-US', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        }) : 'Not available'}
+      </Text>
+
     </View>
   );
 }
@@ -39,5 +52,9 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#ff4081',
+  },
+  animation: {
+    width: Dimensions.get('window').width,
+    height: 300,
   },
 });
