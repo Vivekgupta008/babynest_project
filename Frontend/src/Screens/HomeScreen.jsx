@@ -40,7 +40,7 @@ export default function HomeScreen({ navigation }) {
       
       if (fetchedDueDate) {
         setDueDate(fetchedDueDate);
-      console.log(' Due Date:', dueDate); // Debugging line
+        console.log(' Due Date:', fetchedDueDate); // Debugging line
 
         const calculatedWeek = calculateCurrentWeek(fetchedDueDate);
         setCurrentWeek(calculatedWeek);
@@ -134,7 +134,13 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.babyInfo}>
             <Text style={styles.weekText}>Week {currentWeek}</Text>
             <Text style={styles.babySize}>Size of an avocado</Text>
-            <Text style={styles.dueDate}>Due: {dueDate}</Text>
+            <Text style={styles.dueDate}>
+              Due: {dueDate ? new Date(dueDate).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              }) : 'Not available'}
+            </Text>
           </View>
         </View>
 

@@ -14,6 +14,12 @@ import WeightScreen from '../Screens/WeightScreen';
 import MoodScreen from '../Screens/MoodScreen';
 import MedicineScreen from '../Screens/MedicineScreen';
 import SymptomsScreen from '../Screens/SymptomsScreen';
+import DueDateScreen from '../Screens/DueDateScreen';
+import SleepScreen from '../Screens/SleepScreen';
+import StressScreen from '../Screens/StressScreen';
+import UrineTestScreen from '../Screens/UrineTestScreen';
+import BloodPressureScreen from '../Screens/BloodPressureScreen';
+import DischargeScreen from '../Screens/DischargeScreen';
 
 const Stack = createStackNavigator();
 
@@ -24,6 +30,7 @@ export default function StackNavigation() {
         {/* Optional onboarding screens */}
         <Stack.Screen name="Onboarding" component={OnBoardingScreen} />
         <Stack.Screen name="BasicDetails" component={BasicDetailsScreen} />
+        <Stack.Screen name="DueDate" component={DueDateScreen} />
 
         {/* Main tabbed UI */}
         <Stack.Screen name="MainTabs" component={BottomTabs} />
@@ -39,6 +46,11 @@ export default function StackNavigation() {
         <Stack.Screen name="Mood" component={MoodScreen} />
         <Stack.Screen name="Medicine" component={MedicineScreen} />
         <Stack.Screen name="Symptoms" component={SymptomsScreen} />
+        <Stack.Screen name="Sleep" component={SleepScreen} />
+        <Stack.Screen name="Stress" component={StressScreen} />
+        <Stack.Screen name="UrineTest" component={UrineTestScreen} />
+        <Stack.Screen name="BloodPressure" component={BloodPressureScreen} />
+        <Stack.Screen name="Discharge" component={DischargeScreen} />
       </Stack.Navigator>
     </CustomDrawer>
   );

@@ -1,17 +1,32 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {useState, useEffect, useRef} from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, FlatList,
-  StyleSheet, Animated, Alert, ActivityIndicator, Keyboard,
-  KeyboardAvoidingView, Platform, TouchableWithoutFeedback,
-  SafeAreaView
-} from "react-native";
-import Clipboard from "@react-native-clipboard/clipboard";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import { useNavigation } from "@react-navigation/native";
-import { fetchAvailableGGUFs, downloadModel, generateResponse } from "../model/model";
-import { GGUF_FILE } from "@env";
-import Markdown from "react-native-markdown-display";
-import {BASE_URL} from "@env";
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  Animated,
+  Alert,
+  ActivityIndicator,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  SafeAreaView,
+} from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import {useNavigation} from '@react-navigation/native';
+import {
+  fetchAvailableGGUFs,
+  downloadModel,
+  generateResponse,
+} from '../model/model';
+import {GGUF_FILE} from '@env';
+import Markdown from 'react-native-markdown-display';
+import {BASE_URL} from '@env';
+import NetInfo from '@react-native-community/netinfo';
 
 export default function ChatScreen() {
   const navigation = useNavigation();
@@ -21,13 +36,13 @@ export default function ChatScreen() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const [userInput, setUserInput] = useState("");
+  const [userInput, setUserInput] = useState('');
   const flatListRef = useRef(null);
-  
+
   useEffect(() => {
     const loadModel = async () => {
       try {
-        console.log("Fetching available GGUFs...");
+        console.log('Fetching available GGUFs...');
         const files = await fetchAvailableGGUFs();
         setAvailableGGUFs(files);
 
@@ -39,12 +54,12 @@ export default function ChatScreen() {
           await downloadModel(GGUF_FILE, setProgress);
           setIsDownloading(false);
 
-          console.log("Model downloaded successfully!");
+          console.log('Model downloaded successfully!');
         } else {
-          console.warn("Model file not found in Hugging Face repo.");
+          console.warn('Model file not found in Hugging Face repo.');
         }
       } catch (error) {
-        Alert.alert("Error", "Failed to load model: " + error.message);
+        Alert.alert('Error', 'Failed to load model: ' + error.message);
         console.error(error);
       }
     };
@@ -53,53 +68,70 @@ export default function ChatScreen() {
 
   const handleSendMessage = async () => {
     if (!userInput.trim()) {
-      Alert.alert("Input Error", "Please enter a message.");
+      Alert.alert('Input Error', 'Please enter a message.');
       return;
     }
 
-    const userMessage = { id: Date.now().toString(), role: "user", content: userInput };
+    const userMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: userInput,
+    };
     const updatedConversation = [...conversation, userMessage];
 
     setConversation(updatedConversation);
-    setUserInput("");
+    setUserInput('');
     setIsGenerating(true);
 
-    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
-
+    setTimeout(() => flatListRef.current?.scrollToEnd({animated: true}), 100);
 
     try {
-      const apiRes = await fetch(`${BASE_URL}/ask`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: userInput }),
-      });
-  
-      const json = await apiRes.json();
-  
-      let reply = "";
-  
-      if (json.response) {
-        // Backend RAG handled it
-        reply = json.response;
-      } else if (json.fallback) {
-        // Use local model as fallback
+      const netInfo = await NetInfo.fetch();
+      let reply = '';
+
+      if (netInfo.isConnected) {
+        console.log('🟢 Online – hitting backend');
+
+        const apiRes = await fetch(`${BASE_URL}/ask`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({question: userInput}),
+        });
+
+        const json = await apiRes.json();
+
+        if (json.response) {
+          reply = json.response;
+        } else if (json.fallback) {
+          console.log('💬 Using local model fallback');
+          reply = await generateResponse(updatedConversation);
+        }
+      } else {
+        console.log('🔴 Offline – using local model');
         reply = await generateResponse(updatedConversation);
       }
 
       if (reply) {
-        const botMessage = { id: (Date.now() + 1).toString(), role: "assistant", content: reply };
+        const botMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: reply,
+        };
         setConversation([...updatedConversation, botMessage]);
-        setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+        setTimeout(
+          () => flatListRef.current?.scrollToEnd({animated: true}),
+          100,
+        );
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to generate response: " + error.message);
+      Alert.alert('Error', 'Failed to generate response: ' + error.message);
       console.error(error);
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const handleCopyMessage = (message) => {
+  const handleCopyMessage = message => {
     Clipboard.setString(message);
   };
 
@@ -109,7 +141,7 @@ export default function ChatScreen() {
   };
 
   const scrollToBottom = () => {
-    flatListRef.current?.scrollToEnd({ animated: true });
+    flatListRef.current?.scrollToEnd({animated: true});
     setShowScrollToBottom(false);
   };
 
@@ -127,11 +159,15 @@ export default function ChatScreen() {
       <FlatList
         ref={flatListRef}
         data={conversation}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
+        keyExtractor={item => item.id}
+        renderItem={({item}) => (
           <TouchableOpacity onLongPress={() => handleCopyMessage(item.content)}>
-            <View style={[styles.messageContainer, item.role === "user" ? styles.userMessage : styles.botMessage]}>
-              {item.role === "assistant" ? (
+            <View
+              style={[
+                styles.messageContainer,
+                item.role === 'user' ? styles.userMessage : styles.botMessage,
+              ]}>
+              {item.role === 'assistant' ? (
                 <Markdown style={markdownStyles}>{item.content}</Markdown>
               ) : (
                 <Text style={styles.messageText}>{item.content}</Text>
@@ -142,17 +178,21 @@ export default function ChatScreen() {
         contentContainerStyle={styles.chatArea}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        onScroll={(event) => {
-          const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+        onScroll={event => {
+          const {contentOffset, contentSize, layoutMeasurement} =
+            event.nativeEvent;
           const isBottom =
-            layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - 20;
           setShowScrollToBottom(!isBottom);
         }}
       />
 
       {/* Floating Scroll to Bottom Button */}
       {showScrollToBottom && (
-        <TouchableOpacity style={styles.scrollToBottomButton} onPress={scrollToBottom}>
+        <TouchableOpacity
+          style={styles.scrollToBottomButton}
+          onPress={scrollToBottom}>
           <Icon name="keyboard-arrow-down" size={30} color="black" />
         </TouchableOpacity>
       )}
@@ -165,10 +205,10 @@ export default function ChatScreen() {
       )}
 
       {/* Input Field */}
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "position" : undefined}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'position' : undefined}>
         <View style={styles.inputContainer}>
           <TextInput
-
             style={styles.input}
             placeholder="Type a message..."
             placeholderTextColor="#888"
@@ -176,19 +216,26 @@ export default function ChatScreen() {
             scrollEnabled
             value={userInput}
             onChangeText={setUserInput}
-            onFocus={() => setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100)}
+            onFocus={() =>
+              setTimeout(
+                () => flatListRef.current?.scrollToEnd({animated: true}),
+                100,
+              )
+            }
           />
           <TouchableOpacity style={styles.pasteButton} onPress={handlePaste}>
             <Icon name="content-paste" size={24} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage} disabled={isGenerating}>
+          <TouchableOpacity
+            style={styles.sendButton}
+            onPress={handleSendMessage}
+            disabled={isGenerating}>
             <Icon name="send" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-
 }
 
 // Typing Indicator (Minimalist Dots Animation)
@@ -198,9 +245,17 @@ const TypingIndicator = () => {
   useEffect(() => {
     const animation = Animated.loop(
       Animated.sequence([
-        Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
-        Animated.timing(fadeAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
-      ])
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]),
     );
     animation.start();
     return () => animation.stop();
@@ -208,9 +263,9 @@ const TypingIndicator = () => {
 
   return (
     <View style={styles.typingContainer}>
-      <Animated.View style={[styles.dot, { opacity: fadeAnim }]} />
-      <Animated.View style={[styles.dot, { opacity: fadeAnim }]} />
-      <Animated.View style={[styles.dot, { opacity: fadeAnim }]} />
+      <Animated.View style={[styles.dot, {opacity: fadeAnim}]} />
+      <Animated.View style={[styles.dot, {opacity: fadeAnim}]} />
+      <Animated.View style={[styles.dot, {opacity: fadeAnim}]} />
     </View>
   );
 };
@@ -218,19 +273,19 @@ const TypingIndicator = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#ff4081",
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ff4081',
     padding: 15,
     elevation: 5,
   },
   headerTitle: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginLeft: 10,
   },
   chatArea: {
@@ -238,53 +293,53 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   messageContainer: {
-    maxWidth: "75%",
+    maxWidth: '75%',
     padding: 10,
     marginVertical: 5,
     borderRadius: 10,
   },
   userMessage: {
-    alignSelf: "flex-end",
-    backgroundColor: "#F36196",
+    alignSelf: 'flex-end',
+    backgroundColor: '#F36196',
   },
   botMessage: {
-    alignSelf: "flex-start",
-    backgroundColor: "#f0f0f0",
+    alignSelf: 'flex-start',
+    backgroundColor: '#f0f0f0',
   },
   messageText: {
     fontSize: 16,
-    color: "#333",
+    color: '#333',
   },
   inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 10,
     borderTopWidth: 1,
-    borderColor: "#ddd",
-    backgroundColor: "#fff",
+    borderColor: '#ddd',
+    backgroundColor: '#fff',
   },
   input: {
     flex: 1,
     padding: 10,
     fontSize: 16,
     borderRadius: 25,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: '#f8f8f8',
   },
   pasteButton: {
     marginHorizontal: 5,
-    backgroundColor: "#ff4081",
+    backgroundColor: '#ff4081',
     padding: 10,
     borderRadius: 25,
   },
   sendButton: {
-    backgroundColor: "#ff4081",
+    backgroundColor: '#ff4081',
     padding: 10,
     borderRadius: 25,
   },
   typingContainer: {
-    flexDirection: "row",
-    alignSelf: "flex-start",
-    backgroundColor: "#f0f0f0",
+    flexDirection: 'row',
+    alignSelf: 'flex-start',
+    backgroundColor: '#f0f0f0',
     padding: 10,
     borderRadius: 10,
     marginBottom: 5,
@@ -293,51 +348,51 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#888",
+    backgroundColor: '#888',
     marginHorizontal: 2,
   },
   scrollToBottomButton: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 40,
     right: '45%',
-    backgroundColor: "white",
+    backgroundColor: 'white',
     padding: 5,
     borderRadius: 30,
     elevation: 5,
-    zIndex:1,
-    alignItems: "center",
-    justifyContent: "center",
+    zIndex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
 const markdownStyles = {
-  body: { 
-    color: "#333", 
-    fontSize: 16 
+  body: {
+    color: '#333',
+    fontSize: 16,
   },
-  strong: { 
-    fontWeight: "bold" 
+  strong: {
+    fontWeight: 'bold',
   },
-  em: { 
-    fontStyle: "italic" 
+  em: {
+    fontStyle: 'italic',
   },
-  blockquote: { 
-    backgroundColor: "#f1f1f1", 
-    padding: 5, 
-    borderLeftWidth: 3, 
-    borderLeftColor: "#ccc" 
+  blockquote: {
+    backgroundColor: '#f1f1f1',
+    padding: 5,
+    borderLeftWidth: 3,
+    borderLeftColor: '#ccc',
   },
-  code_block: { 
-    backgroundColor: "#eee", 
-    padding: 10, 
-    borderRadius: 5, 
-    fontFamily: "monospace" 
+  code_block: {
+    backgroundColor: '#eee',
+    padding: 10,
+    borderRadius: 5,
+    fontFamily: 'monospace',
   },
-  link: { 
-    color: "#ff4081", 
-    textDecorationLine: "underline" 
+  link: {
+    color: '#ff4081',
+    textDecorationLine: 'underline',
   },
-  list_item: { 
-    marginVertical: 5 
+  list_item: {
+    marginVertical: 5,
   },
 };

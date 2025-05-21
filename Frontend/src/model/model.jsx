@@ -160,7 +160,7 @@ export const generateResponse = async (conversation) => {
     }
   };
   
-  export const streamResponse = async (conversation, onToken) => {
+export const streamResponse = async (conversation, onToken) => {
     if (!context) {
       Alert.alert("Model Not Loaded", "Please load the model first.");
       return;
